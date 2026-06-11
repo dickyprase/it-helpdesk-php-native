@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (user-generated content)
+uploads/evidence/*
+uploads/tickets/*
+uploads/chat/*
+!uploads/evidence/.gitkeep
+!uploads/tickets/.gitkeep
+!uploads/chat/.gitkeep
+
+# Logs
+*.log
