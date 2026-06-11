@@ -271,7 +271,18 @@ function generateTicketCode() {
 function createTicket($title, $description, $category_id, $division_id = null) {
     global $conn;
 
-    $user_id     = getCurrentUserId();
+    $user_id = getCurrentUserId();
+    if (empty($user_id)) {
+        return ['status' => false, 'message' => 'Sesi tidak valid. Silakan login kembali.'];
+    }
+
+    // Validasi user_id ada di database
+    $check_user = mysqli_query($conn, "SELECT id FROM `User` WHERE id = '" . mysqli_real_escape_string($conn, $user_id) . "' AND is_active = 1");
+    if (!$check_user || mysqli_num_rows($check_user) === 0) {
+        session_destroy();
+        return ['status' => false, 'message' => 'User tidak ditemukan. Silakan login kembali.'];
+    }
+
     $title       = mysqli_real_escape_string($conn, $title);
     $description = mysqli_real_escape_string($conn, $description);
     $category_id = mysqli_real_escape_string($conn, $category_id);
@@ -298,6 +309,19 @@ function createTicket($title, $description, $category_id, $division_id = null) {
         while ($staff = mysqli_fetch_assoc($staff_users)) {
             createNotification($staff['id'], $ticket_id, 'ticket_created', "Tiket baru {$code} dari {$user_name}: {$title}");
         }
+
+        // WA Notification
+        $cat_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT name FROM `Category` WHERE id = '$category_id'"));
+        $kategori_nama = $cat_row['name'] ?? '-';
+        $wa_phones = getPhonesByRole(['STAFF', 'MANAGER']);
+        $wa_msg = renderWaTemplate('ticket_created', [
+            'kode_tiket' => $code,
+            'judul_tiket' => $title,
+            'nama_user' => $user_name,
+            'kategori' => $kategori_nama,
+            'status' => 'OPEN'
+        ]);
+        if ($wa_msg) sendWaNotification($wa_phones, $wa_msg);
 
         return ['status' => true, 'message' => 'Tiket berhasil dibuat! Kode: ' . $code, 'ticket_id' => $ticket_id];
     }
@@ -382,6 +406,19 @@ function claimTicket($ticket_id) {
     $staff_name = getCurrentUserName();
     createNotification($ticket['user_id'], $ticket_id, 'ticket_claimed', "Tiket {$ticket['code']} telah diambil oleh {$staff_name}.");
 
+    // WA Notification
+    $full_ticket = getTicketById($ticket_id);
+    $user_phone = mysqli_fetch_assoc(mysqli_query($conn, "SELECT phone FROM `User` WHERE id = '{$ticket['user_id']}'"));
+    $cat_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT name FROM `Category` WHERE id = '{$full_ticket['category_id']}'"));
+    $wa_msg = renderWaTemplate('ticket_assigned', [
+        'kode_tiket' => $ticket['code'],
+        'judul_tiket' => $full_ticket['title'] ?? '',
+        'nama_user' => $full_ticket['user_name'] ?? '',
+        'nama_staff' => $staff_name,
+        'kategori' => $cat_row['name'] ?? '-'
+    ]);
+    if ($wa_msg && !empty($user_phone['phone'])) sendWaNotification($user_phone['phone'], $wa_msg);
+
     return ['status' => true, 'message' => 'Tiket berhasil diklaim'];
 }
 
@@ -397,6 +434,20 @@ function unclaimTicket($ticket_id, $reason) {
     if ($ticket['status'] !== 'IN_PROGRESS') return ['status' => false, 'message' => 'Hanya tiket Diproses yang dapat dilepas'];
 
     mysqli_query($conn, "UPDATE `Ticket` SET staff_id = NULL, status = 'OPEN', updated_at = NOW() WHERE id = '$ticket_id'");
+
+    // Notification
+    createNotification($ticket['user_id'], $ticket_id, 'ticket_unclaimed', "Tiket {$ticket['code']} telah dilepas oleh staff.");
+
+    // WA Notification
+    $user_phone = mysqli_fetch_assoc(mysqli_query($conn, "SELECT phone FROM `User` WHERE id = '{$ticket['user_id']}'"));
+    $wa_msg = renderWaTemplate('ticket_unclaimed', [
+        'kode_tiket' => $ticket['code'],
+        'judul_tiket' => $ticket['title'],
+        'nama_user' => $ticket['user_name'] ?? '',
+        'kategori' => $ticket['category_name'] ?? '-'
+    ]);
+    if ($wa_msg && !empty($user_phone['phone'])) sendWaNotification($user_phone['phone'], $wa_msg);
+
     return ['status' => true, 'message' => 'Tiket berhasil dilepas'];
 }
 
@@ -413,6 +464,22 @@ function setTicketPending($ticket_id, $reason) {
     if ($ticket['status'] !== 'IN_PROGRESS') return ['status' => false, 'message' => 'Hanya tiket Diproses yang dapat di-pending'];
 
     mysqli_query($conn, "UPDATE `Ticket` SET status = 'PENDING', pending_reason = '$reason', updated_at = NOW() WHERE id = '$ticket_id'");
+
+    // Notification
+    $staff_name = getCurrentUserName();
+    createNotification($ticket['user_id'], $ticket_id, 'ticket_pending', "Tiket {$ticket['code']} di-pending oleh {$staff_name}.");
+
+    // WA Notification
+    $user_phone = mysqli_fetch_assoc(mysqli_query($conn, "SELECT phone FROM `User` WHERE id = '{$ticket['user_id']}'"));
+    $wa_msg = renderWaTemplate('ticket_pending', [
+        'kode_tiket' => $ticket['code'],
+        'judul_tiket' => $ticket['title'],
+        'nama_user' => $ticket['user_name'] ?? '',
+        'nama_staff' => $staff_name,
+        'kategori' => $ticket['category_name'] ?? '-'
+    ]);
+    if ($wa_msg && !empty($user_phone['phone'])) sendWaNotification($user_phone['phone'], $wa_msg);
+
     return ['status' => true, 'message' => 'Tiket berhasil di-pending'];
 }
 
@@ -435,6 +502,25 @@ function resolveTicket($ticket_id, $note) {
     $managers = mysqli_query($conn, "SELECT id FROM `User` WHERE role = 'MANAGER' AND is_active = 1");
     while ($mgr = mysqli_fetch_assoc($managers)) {
         createNotification($mgr['id'], $ticket_id, 'ticket_resolved_manager', "Tiket {$ticket['code']} telah diselesaikan oleh staff dan menunggu validasi Anda.");
+    }
+
+    // WA Notification
+    $staff_name = getCurrentUserName();
+    $user_phone = mysqli_fetch_assoc(mysqli_query($conn, "SELECT phone FROM `User` WHERE id = '{$ticket['user_id']}'"));
+    $cat_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT name FROM `Category` WHERE id = '{$ticket['category_id']}'"));
+    $wa_msg = renderWaTemplate('ticket_resolved', [
+        'kode_tiket' => $ticket['code'],
+        'judul_tiket' => $ticket['title'],
+        'nama_user' => $ticket['user_name'] ?? '',
+        'nama_staff' => $staff_name,
+        'kategori' => $cat_row['name'] ?? '-'
+    ]);
+    if ($wa_msg) {
+        // Send to user
+        if (!empty($user_phone['phone'])) sendWaNotification($user_phone['phone'], $wa_msg);
+        // Send to all managers
+        $manager_phones = getPhonesByRole(['MANAGER']);
+        if (!empty($manager_phones)) sendWaNotification($manager_phones, $wa_msg);
     }
 
     return ['status' => true, 'message' => 'Tiket berhasil diselesaikan'];
@@ -495,6 +581,29 @@ function updateTicketStatus($ticket_id, $new_status, $custom_points = null, $adm
         }
 
         createNotification($ticket['user_id'], $ticket_id, 'ticket_closed', "Tiket {$ticket['code']} telah ditutup. Terima kasih.");
+
+        // WA Notification - ke user
+        $user_phone = mysqli_fetch_assoc(mysqli_query($conn, "SELECT phone FROM `User` WHERE id = '{$ticket['user_id']}'"));
+        $cat_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT name FROM `Category` WHERE id = '{$ticket['category_id']}'"));
+        $wa_msg = renderWaTemplate('ticket_closed', [
+            'kode_tiket' => $ticket['code'],
+            'judul_tiket' => $ticket['title'],
+            'nama_user' => $ticket['user_name'] ?? '',
+            'kategori' => $cat_row['name'] ?? '-',
+            'status' => 'CLOSED'
+        ]);
+        if ($wa_msg && !empty($user_phone['phone'])) sendWaNotification($user_phone['phone'], $wa_msg);
+
+        // WA Notification - ke staff penangani
+        $staff_phone = mysqli_fetch_assoc(mysqli_query($conn, "SELECT phone, name FROM `User` WHERE id = '$staff_id'"));
+        $wa_msg_staff = renderWaTemplate('ticket_closed_staff', [
+            'kode_tiket' => $ticket['code'],
+            'judul_tiket' => $ticket['title'],
+            'nama_user' => $ticket['user_name'] ?? '',
+            'nama_staff' => $staff_phone['name'] ?? '',
+            'kategori' => $cat_row['name'] ?? '-'
+        ]);
+        if ($wa_msg_staff && !empty($staff_phone['phone'])) sendWaNotification($staff_phone['phone'], $wa_msg_staff);
     }
 
     return ['status' => true, 'message' => 'Status berhasil diubah'];
@@ -871,6 +980,122 @@ function markAllNotificationsRead($user_id) {
     $user_id = mysqli_real_escape_string($conn, $user_id);
     mysqli_query($conn, "UPDATE `Notification` SET is_read = 1 WHERE user_id = '$user_id' AND is_read = 0");
     return ['status' => true, 'message' => 'Semua notifikasi ditandai dibaca'];
+}
+
+// ============================================================
+// WHATSAPP NOTIFICATION
+// ============================================================
+
+function getWaSetting() {
+    static $wa_cache = null;
+    if ($wa_cache !== null) return $wa_cache;
+
+    global $conn;
+    $result = mysqli_query($conn, "SELECT * FROM `WA_Setting` LIMIT 1");
+    $wa_cache = $result ? mysqli_fetch_assoc($result) : null;
+    return $wa_cache;
+}
+
+function renderWaTemplate($event_type, $vars = []) {
+    global $conn;
+    $event_type = mysqli_real_escape_string($conn, $event_type);
+    $result = mysqli_query($conn, "SELECT template_body FROM `Notification_Template` WHERE event_type = '$event_type' LIMIT 1");
+    if (!$result || mysqli_num_rows($result) === 0) return null;
+
+    $row = mysqli_fetch_assoc($result);
+    $template = $row['template_body'];
+
+    foreach ($vars as $key => $value) {
+        $template = str_replace('{' . $key . '}', $value, $template);
+    }
+    return $template;
+}
+
+function getPhonesByRole($roles = []) {
+    global $conn;
+    if (empty($roles)) return [];
+
+    $escaped = array_map(function($r) use ($conn) {
+        return "'" . mysqli_real_escape_string($conn, $r) . "'";
+    }, $roles);
+    $in = implode(',', $escaped);
+
+    $result = mysqli_query($conn, "SELECT phone FROM `User` WHERE role IN ($in) AND is_active = 1 AND phone IS NOT NULL AND phone != ''");
+    $phones = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $phones[] = $row['phone'];
+    }
+    return $phones;
+}
+
+function sendWaNotification($recipients, $message) {
+    $setting = getWaSetting();
+    if (!$setting) return false;
+    if (empty($setting['gateway_url']) || empty($setting['api_key'])) return false;
+
+    if (is_array($recipients)) {
+        if (empty($recipients)) return false;
+        $payload = json_encode(['recipients' => $recipients, 'message' => $message]);
+    } else {
+        if (empty($recipients)) return false;
+        $payload = json_encode(['to' => $recipients, 'message' => $message]);
+    }
+
+    $url = $setting['gateway_url'] . '/api/send';
+    $api_key = $setting['api_key'];
+
+    // Coba pakai cURL, fallback ke file_get_contents
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'x-api-key: ' . $api_key
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+
+        if ($curl_error) return false;
+    } else {
+        $options = [
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\nx-api-key: " . $api_key . "\r\n",
+                'content' => $payload,
+                'timeout' => 5,
+                'ignore_errors' => true
+            ],
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ]
+        ];
+        $context = stream_context_create($options);
+        $response = @file_get_contents($url, false, $context);
+        $http_code = 0;
+        if (isset($http_response_header)) {
+            foreach ($http_response_header as $header) {
+                if (preg_match('/^HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
+                    $http_code = (int)$matches[1];
+                }
+            }
+        }
+    }
+
+    if ($http_code === 200 && $response) {
+        $data = json_decode($response, true);
+        return isset($data['success']) && $data['success'] === true;
+    }
+    return false;
 }
 
 // ============================================================

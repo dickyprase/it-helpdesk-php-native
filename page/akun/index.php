@@ -88,7 +88,8 @@ include '../../includes/header.php';
                             </div>
                             <div class="mb-3">
                                 <label for="phone" class="form-label">No. HP (opsional) :</label>
-                                <input type="text" class="form-control" name="phone" id="phone">
+                                <input type="text" class="form-control" name="phone" id="phone" pattern="^(08|628)\d{8,13}$" title="Format: 08xx atau 628xx, minimal 10 digit">
+                                <div class="form-text">Nomor WhatsApp aktif untuk notifikasi.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="division_id" class="form-label">Divisi <span class="text-danger">*</span>:</label>
@@ -143,21 +144,23 @@ include '../../includes/header.php';
                                 <tbody>
                                     <?php $no = 1; foreach ($users as $u): ?>
                                     <tr>
-                                        <td><?= $no++ ?></td>
+                                        <td class="text-center"><?= $no++ ?></td>
                                         <td><?= htmlspecialchars($u['name'] ?? '-') ?></td>
                                         <td><?= htmlspecialchars($u['email'] ?? '-') ?></td>
                                         <td><?= htmlspecialchars($u['division_name'] ?? '-') ?></td>
-                                        <td><?= priorityBadge($u['division_priority'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($u['role'] ?? '-') ?></td>
-                                        <td>
+                                        <td class="text-center"><?= priorityBadge($u['division_priority'] ?? '') ?></td>
+                                        <td class="text-center"><span class="badge bg-secondary"><?= htmlspecialchars($u['role'] ?? '-') ?></span></td>
+                                        <td class="text-center">
                                             <?php if ($u['is_active'] ?? true): ?>
                                                 <span class="badge bg-success">Aktif</span>
                                             <?php else: ?>
                                                 <span class="badge bg-danger">Non Aktif</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-nowrap">
-                                            <button type="button" class="btn btn-success btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modal-<?= htmlspecialchars($u['id']) ?>">Ubah</button>
+                                        <td class="text-center text-nowrap">
+                                            <button type="button" class="btn btn-success btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modal-<?= htmlspecialchars($u['id']) ?>" title="Ubah">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
 
                                             <div class="modal fade" id="modal-<?= htmlspecialchars($u['id']) ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
                                                 <div class="modal-dialog modal-dialog-centered">
@@ -179,7 +182,8 @@ include '../../includes/header.php';
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label class="form-label">No. HP :</label>
-                                                                    <input type="text" class="form-control" name="edit_phone" value="<?= htmlspecialchars($u['phone'] ?? '') ?>">
+                                                                    <input type="text" class="form-control" name="edit_phone" value="<?= htmlspecialchars($u['phone'] ?? '') ?>" pattern="^(08|628)\d{8,13}$" title="Format: 08xx atau 628xx">
+                                                                    <div class="form-text">Format: 08xx atau 628xx</div>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Divisi <span class="text-danger">*</span>:</label>
@@ -213,9 +217,13 @@ include '../../includes/header.php';
                                             <form method="POST" class="d-inline toggle-form" data-active="<?= ($u['is_active'] ?? true) ? '1' : '0' ?>" data-name="<?= htmlspecialchars($u['name'] ?? '') ?>">
                                                 <input type="hidden" name="toggle_id" value="<?= htmlspecialchars($u['id']) ?>">
                                                 <?php if ($u['is_active'] ?? true): ?>
-                                                    <button type="submit" class="btn btn-danger btn-sm">Nonaktifkan</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Nonaktifkan">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
                                                 <?php else: ?>
-                                                    <button type="submit" class="btn btn-warning btn-sm">Aktifkan</button>
+                                                    <button type="submit" class="btn btn-success btn-sm" title="Aktifkan">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
                                                 <?php endif; ?>
                                             </form>
                                         </td>

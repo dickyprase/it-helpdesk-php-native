@@ -48,23 +48,25 @@ include '../../includes/header.php';
                                 <td><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
                                 <td><?= htmlspecialchars($t['division_name'] ?? '-') ?></td>
                                 <td><?= priorityBadge($t['division_priority'] ?? '') ?></td>
-                                <td>
+                                <td class="text-center">
                                     <?php $atts = getTicketAttachments($t['id']); if (!empty($atts)): foreach ($atts as $a): ?>
-                                    <a href="<?= getBaseUrl() . htmlspecialchars($a['filepath']) ?>" target="_blank" class="btn btn-warning btn-sm mb-1"><i class="fas fa-file"></i></a>
+                                    <a href="<?= getBaseUrl() . htmlspecialchars($a['filepath']) ?>" target="_blank" class="btn btn-outline-warning btn-sm" title="Lampiran"><i class="fas fa-paperclip"></i></a>
                                     <?php endforeach; else: ?>-<?php endif; ?>
                                 </td>
-                                <td><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
-                                <td>
+                                <td class="text-center"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
+                                <td class="text-center">
                                     <?php
                                     $status = $t['status'] ?? '';
                                     if ($status === 'RESOLVED') echo '<span class="badge bg-info">Proses Validasi</span>';
                                     else echo '<span class="badge bg-secondary">Ditutup</span>';
                                     ?>
                                 </td>
-                                <td><?= htmlspecialchars($t['staff_name'] ?? '-') ?></td>
-                                <td><?= formatTanggal($t['created_at'] ?? '') ?></td>
-                                <td>
-                                    <a href="<?= getBaseUrl() ?>page/chat/user.php?id=<?= htmlspecialchars($t['id']) ?>" class="btn btn-warning btn-sm">Riwayat Chat</a>
+                                <td class="text-center"><?= htmlspecialchars($t['staff_name'] ?? '-') ?></td>
+                                <td class="text-center"><?= formatTanggal($t['created_at'] ?? '') ?></td>
+                                <td class="text-center">
+                                    <a href="<?= getBaseUrl() ?>page/chat/user.php?id=<?= htmlspecialchars($t['id']) ?>" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-history me-1"></i>Riwayat
+                                    </a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

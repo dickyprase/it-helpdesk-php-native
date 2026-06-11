@@ -64,7 +64,9 @@ include '../../includes/header.php';
                             </div>
                             <div class="mb-3">
                                 <label for="phone" class="form-label">No. HP :</label>
-                                <input type="text" class="form-control" name="phone" id="phone" value="<?= htmlspecialchars($profile['phone'] ?? '') ?>">
+                                <input type="text" class="form-control" name="phone" id="phone" value="<?= htmlspecialchars($profile['phone'] ?? '') ?>" pattern="^(08|628)\d{8,13}$" title="Nomor harus dimulai dengan 08 atau 628, minimal 10 digit">
+                                <div class="form-text">Nomor WhatsApp aktif. Format: 08xx atau 628xx. Digunakan untuk notifikasi WhatsApp.</div>
+                                <div class="invalid-feedback" id="phoneError">Nomor harus dimulai dengan 08 atau 628, hanya angka, minimal 10 digit.</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Role :</label>
@@ -104,4 +106,35 @@ include '../../includes/header.php';
             </div>
         </div>
     </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                var val = this.value.replace(/\D/g, '');
+                if (val.length > 0 && !val.match(/^(08|628)/)) {
+                    this.classList.add('is-invalid');
+                } else if (val.length > 0 && val.length < 10) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            });
+
+            var form = phoneInput.closest('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    var val = phoneInput.value.replace(/\D/g, '');
+                    if (val.length > 0 && !val.match(/^(08|628)\d{8,13}$/)) {
+                        e.preventDefault();
+                        phoneInput.classList.add('is-invalid');
+                        phoneInput.focus();
+                    }
+                });
+            }
+        }
+    });
+    </script>
+
     <?php include '../../includes/footer.php'; ?>

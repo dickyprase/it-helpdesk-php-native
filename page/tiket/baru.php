@@ -72,16 +72,18 @@ include '../../includes/header.php';
                                 <td><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
                                 <td><?= htmlspecialchars($t['division_name'] ?? '-') ?></td>
                                 <td><?= priorityBadge($t['division_priority'] ?? '') ?></td>
-                                <td>
+                                <td class="text-center">
                                     <?php $atts = getTicketAttachments($t['id']); if (!empty($atts)): foreach ($atts as $a): ?>
-                                    <a href="<?= getBaseUrl() . htmlspecialchars($a['filepath']) ?>" target="_blank" class="btn btn-warning btn-sm mb-1"><i class="fas fa-file"></i></a>
+                                    <a href="<?= getBaseUrl() . htmlspecialchars($a['filepath']) ?>" target="_blank" class="btn btn-outline-warning btn-sm" title="Lampiran"><i class="fas fa-paperclip"></i></a>
                                     <?php endforeach; else: ?>-<?php endif; ?>
                                 </td>
-                                <td><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
-                                <td>
+                                <td class="text-center"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
+                                <td class="text-center">
                                     <form method="POST" class="d-inline claim-form" data-ticket="<?= htmlspecialchars($t['code'] ?? '') ?>">
                                         <input type="hidden" name="claim_id" value="<?= htmlspecialchars($t['id']) ?>">
-                                        <button type="submit" class="btn btn-success btn-sm">Ambil Tiket</button>
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="fas fa-hand-paper me-1"></i>Ambil
+                                        </button>
                                     </form>
                                 </td>
                             </tr>

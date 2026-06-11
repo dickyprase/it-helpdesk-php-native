@@ -78,17 +78,21 @@ include '../../includes/header.php';
                         <tbody>
                             <?php $no = 1; foreach ($tickets as $t): ?>
                             <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= htmlspecialchars($t['code'] ?? '-') ?></td>
+                                <td class="text-center"><?= $no++ ?></td>
+                                <td><code><?= htmlspecialchars($t['code'] ?? '-') ?></code></td>
                                 <td><?= htmlspecialchars($t['user_name'] ?? '-') ?></td>
                                 <td><?= htmlspecialchars($t['staff_name'] ?? '-') ?></td>
-                                <td><?= formatTanggal($t['created_at'] ?? '') ?></td>
+                                <td class="text-center"><?= formatTanggal($t['created_at'] ?? '') ?></td>
                                 <td><?= htmlspecialchars(potongTeks($t['description'] ?? '', 60)) ?></td>
                                 <td><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
-                                <td><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
-                                <td class="text-nowrap">
-                                    <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($t['id']) ?>" class="btn btn-warning btn-sm me-1">Riwayat Chat</a>
-                                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modal-<?= htmlspecialchars($t['id']) ?>">Validasi</button>
+                                <td class="text-center"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
+                                <td class="text-center text-nowrap">
+                                    <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($t['id']) ?>" class="btn btn-warning btn-sm me-1" title="Riwayat Chat">
+                                        <i class="fas fa-history"></i>
+                                    </a>
+                                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modal-<?= htmlspecialchars($t['id']) ?>" title="Validasi">
+                                        <i class="fas fa-check me-1"></i>Validasi
+                                    </button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

@@ -196,6 +196,8 @@ CREATE TABLE IF NOT EXISTS `Notification` (
 CREATE TABLE IF NOT EXISTS `WA_Setting` (
   `id` CHAR(36) NOT NULL DEFAULT (UUID()),
   `is_enabled` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Toggle notifikasi global',
+  `gateway_url` VARCHAR(255) NOT NULL DEFAULT 'http://localhost:3001' COMMENT 'URL WA Gateway',
+  `api_key` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'API Key WA Gateway',
   `session_data` TEXT DEFAULT NULL,
   `connection_status` VARCHAR(50) NOT NULL DEFAULT 'disconnected',
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -208,8 +210,10 @@ CREATE TABLE IF NOT EXISTS `WA_Setting` (
 CREATE TABLE IF NOT EXISTS `Notification_Template` (
   `id` CHAR(36) NOT NULL DEFAULT (UUID()),
   `event_type` VARCHAR(50) NOT NULL COMMENT 'Contoh: ticket_created, ticket_resolved',
-  `template_body` TEXT NOT NULL COMMENT 'Mendukung variabel [nama-user], [id-ticket], dll',
-  `variables` VARCHAR(500) NOT NULL COMMENT 'Comma-separated list variabel',
+  `label` VARCHAR(100) NOT NULL DEFAULT '' COMMENT 'Nama event yang ramah pengguna',
+  `description` TEXT DEFAULT NULL COMMENT 'Keterangan kapan notif dikirim',
+  `template_body` TEXT NOT NULL COMMENT 'Template pesan WA dengan variabel {curly}',
+  `variables` TEXT NOT NULL COMMENT 'Comma-separated list variabel {curly}',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -249,20 +253,20 @@ INSERT IGNORE INTO `User` (`id`, `name`, `email`, `password_hash`, `role`, `divi
 -- ============================================================
 -- DATA AWAL: WA Setting
 -- ============================================================
-INSERT IGNORE INTO `WA_Setting` (`id`, `is_enabled`, `connection_status`) VALUES
-(UUID(), 0, 'disconnected');
+INSERT IGNORE INTO `WA_Setting` (`id`, `is_enabled`, `connection_status`, `gateway_url`, `api_key`) VALUES
+(UUID(), 0, 'disconnected', 'http://localhost:3001', '');
 
 -- ============================================================
 -- DATA AWAL: Notification Templates
 -- ============================================================
-INSERT IGNORE INTO `Notification_Template` (`id`, `event_type`, `template_body`, `variables`) VALUES
-(UUID(), 'ticket_created', 'Halo [nama-user], tiketmu *[id-ticket]* _[judul-ticket]_ sudah masuk ke sistem.\n\nKategori: *[kategori]*\nStatus: *[status-akhir]*\n\nHarap ditunggu, staff kami akan segera mengatasi keluhanmu.', '[id-ticket],[judul-ticket],[kategori],[nama-user],[status-akhir]'),
-(UUID(), 'ticket_assigned', 'Halo [nama-user], tiketmu *[id-ticket]* _[judul-ticket]_ telah ditugaskan kepada staff kami.\n\nStaff: *[nama-staff]*\nKategori: *[kategori]*', '[id-ticket],[judul-ticket],[nama-user],[nama-staff],[kategori]'),
-(UUID(), 'ticket_in_progress', 'Halo [nama-user], tiketmu *[id-ticket]* _[judul-ticket]_ sedang dalam proses penanganan.\n\nDitangani oleh: *[nama-staff]*', '[id-ticket],[judul-ticket],[nama-user],[nama-staff],[kategori]'),
-(UUID(), 'ticket_pending', 'Halo [nama-user], tiketmu *[id-ticket]* _[judul-ticket]_ saat ini dalam status *Pending*.\n\nDitangani oleh: *[nama-staff]*', '[id-ticket],[judul-ticket],[nama-user],[nama-staff],[kategori]'),
-(UUID(), 'ticket_resolved', 'Halo [nama-user], tiketmu *[id-ticket]* _[judul-ticket]_ telah diselesaikan oleh staff kami.\n\nDitangani oleh: *[nama-staff]*', '[id-ticket],[judul-ticket],[nama-user],[nama-staff],[kategori]'),
-(UUID(), 'ticket_closed', 'Halo [nama-user], tiketmu *[id-ticket]* _[judul-ticket]_ telah ditutup secara resmi.\n\nKategori: *[kategori]*\nStatus Akhir: *[status-akhir]*', '[id-ticket],[judul-ticket],[nama-user],[kategori],[status-akhir]'),
-(UUID(), 'ticket_unclaimed', 'Halo [nama-user], tiketmu *[id-ticket]* _[judul-ticket]_ telah dilepas oleh staff dan kembali ke status *Terbuka*.', '[id-ticket],[judul-ticket],[nama-user],[kategori]');
+INSERT IGNORE INTO `Notification_Template` (`id`, `event_type`, `label`, `description`, `template_body`, `variables`) VALUES
+(UUID(), 'ticket_created', 'Tiket Baru Masuk', 'Dikirim ke semua staff & manager saat user membuat tiket baru', 'Ada tiket baru yang tersedia!\n\n*Kode:* {kode_tiket}\n*Judul:* {judul_tiket}\n*User:* {nama_user}\n*Kategori:* {kategori}\n\nSilakan cek dashboard untuk menangani tiket ini.', '{kode_tiket},{judul_tiket},{nama_user},{kategori},{status}'),
+(UUID(), 'ticket_assigned', 'Tiket Diklaim Staff', 'Dikirim ke user pembuat tiket saat staff mengklaim tiket', 'Halo {nama_user}, tiketmu *{kode_tiket}* _{judul_tiket}_ telah ditugaskan kepada staff kami.\n\nStaff: *{nama_staff}*\nKategori: *{kategori}*', '{kode_tiket},{judul_tiket},{nama_user},{nama_staff},{kategori}'),
+(UUID(), 'ticket_pending', 'Tiket Di-Pending', 'Dikirim ke user pembuat tiket saat staff menunda tiket', 'Halo {nama_user}, tiketmu *{kode_tiket}* _{judul_tiket}_ saat ini dalam status *Pending*.\n\nDitangani oleh: *{nama_staff}*', '{kode_tiket},{judul_tiket},{nama_user},{nama_staff},{kategori}'),
+(UUID(), 'ticket_resolved', 'Tiket Diselesaikan Staff', 'Dikirim ke user + semua manager saat staff menyelesaikan tiket', 'Halo {nama_user}, tiketmu *{kode_tiket}* _{judul_tiket}_ telah diselesaikan oleh staff kami.\n\nDitangani oleh: *{nama_staff}*', '{kode_tiket},{judul_tiket},{nama_user},{nama_staff},{kategori}'),
+(UUID(), 'ticket_closed', 'Tiket Ditutup (User)', 'Dikirim ke user pembuat tiket saat manager menutup tiket', 'Halo {nama_user}, tiketmu *{kode_tiket}* _{judul_tiket}_ telah ditutup secara resmi.\n\nKategori: *{kategori}*\nStatus Akhir: *{status}*', '{kode_tiket},{judul_tiket},{nama_user},{kategori},{status}'),
+(UUID(), 'ticket_closed_staff', 'Tiket Ditutup (Staff)', 'Dikirim ke staff penangani saat manager menutup tiket', 'Tiket yang Anda tangani telah ditutup oleh manager.\n\n*Kode:* {kode_tiket}\n*Judul:* {judul_tiket}\n*User:* {nama_user}\n\nTerima kasih atas penyelesaiannya!', '{kode_tiket},{judul_tiket},{nama_user},{nama_staff},{kategori}'),
+(UUID(), 'ticket_unclaimed', 'Tiket Dilepas Staff', 'Dikirim ke user pembuat tiket saat staff melepas tiket', 'Halo {nama_user}, tiketmu *{kode_tiket}* _{judul_tiket}_ telah dilepas oleh staff dan kembali ke status *Terbuka*.', '{kode_tiket},{judul_tiket},{nama_user},{kategori}');
 
 SET FOREIGN_KEY_CHECKS = 1;
 

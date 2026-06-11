@@ -216,6 +216,10 @@ $unread_count = getUnreadNotificationCount(getCurrentUserId());
                             <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
                             Divisi
                         </a>
+                        <a class="nav-link" href="<?= getBaseUrl() ?>page/wa-settings/">
+                            <div class="sb-nav-link-icon"><i class="fab fa-whatsapp"></i></div>
+                            Pengaturan WA
+                        </a>
                         <?php endif; ?>
 
                         <!-- Logout (semua role) -->
