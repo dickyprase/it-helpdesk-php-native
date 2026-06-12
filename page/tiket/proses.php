@@ -73,8 +73,9 @@ include '../../includes/header.php';
         <div class="container-fluid px-4">
             <div class="card mb-4 shadow p-3 mb-5 bg-body rounded mt-4">
                 <div class="card-header">
-                    <i class="fas fa-list me-1"></i>
-                    Tiket dalam Proses (<?= count($tickets) ?>)
+                    <i class="fas fa-list me-1" style="color: #8c57ff;"></i>
+                    <span class="fw-semibold">Tiket dalam Proses</span>
+                    <span class="badge badge-subtle-primary ms-2"><?= count($tickets) ?></span>
                 </div>
                 <div class="card-body">
                     <?php if ($flash_success): ?>
@@ -88,105 +89,143 @@ include '../../includes/header.php';
                     <?php endif; ?>
 
                     <?php if (empty($tickets)): ?>
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3" style="color:#cbd5e1;"></i>
                         <p>Tidak ada tiket dalam proses.</p>
                     </div>
                     <?php else: ?>
+                    <div class="table-responsive">
                     <table id="datatablesSimpleTicket">
                         <thead>
                             <tr>
-                                <th>No</th>
+                                <th class="text-center">No</th>
                                 <th>No Tiket</th>
                                 <th>Nama</th>
                                 <th>Tanggal</th>
                                 <th>Deskripsi Kendala</th>
                                 <th>Kategori</th>
                                 <th>Divisi</th>
-                                <th>Prioritas</th>
-                                <th>Bukti</th>
-                                <th>Kesulitan</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
+                                <th class="text-center">Prioritas</th>
+                                <th class="text-center">Bukti</th>
+                                <th class="text-center">Kesulitan</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php $no = 1; foreach ($tickets as $t): ?>
                             <?php $st = $t['status'] ?? ''; ?>
                             <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= htmlspecialchars($t['code'] ?? '-') ?></td>
-                                <td><?= htmlspecialchars($t['user_name'] ?? '-') ?></td>
-                                <td><?= formatTanggal($t['created_at'] ?? '') ?></td>
-                                <td><?= htmlspecialchars(potongTeks($t['description'] ?? '', 80)) ?></td>
-                                <td><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
-                                <td><?= htmlspecialchars($t['division_name'] ?? '-') ?></td>
-                                <td class="text-center"><?= priorityBadge($t['division_priority'] ?? '') ?></td>
-                                <td class="text-center">
-                                    <?php $atts = getTicketAttachments($t['id']); if (!empty($atts)): foreach ($atts as $a): ?>
-                                    <a href="<?= getBaseUrl() . htmlspecialchars($a['filepath']) ?>" target="_blank" class="btn btn-outline-warning btn-sm" title="Lampiran"><i class="fas fa-paperclip"></i></a>
-                                    <?php endforeach; else: ?>-<?php endif; ?>
-                                </td>
-                                <td class="text-center"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
-                                <td class="text-center">
-                                    <?php
-                                    if ($st === 'IN_PROGRESS') echo '<span class="badge bg-primary">Diproses</span>';
-                                    elseif ($st === 'PENDING') echo '<span class="badge bg-warning">Tertunda</span>';
-                                    ?>
-                                </td>
-                                <td class="text-center text-nowrap">
-                                    <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($t['id']) ?>" class="btn btn-danger btn-sm" title="Buka Chat">
-                                        <i class="fas fa-comments"></i>
-                                    </a>
+                                <!-- No -->
+                                <td class="text-center align-middle"><?= $no++ ?></td>
 
+                                <!-- No Tiket -->
+                                <td class="align-middle td-code"><?= htmlspecialchars($t['code'] ?? '-') ?></td>
+
+                                <!-- Nama -->
+                                <td class="align-middle"><?= htmlspecialchars($t['user_name'] ?? '-') ?></td>
+
+                                <!-- Tanggal -->
+                                <td class="align-middle td-date">
+                                    <div class="date-val"><?= formatTanggal($t['created_at'] ?? '') ?></div>
+                                </td>
+
+                                <!-- Deskripsi -->
+                                <td class="align-middle"><?= htmlspecialchars(potongTeks($t['description'] ?? '', 60)) ?></td>
+
+                                <!-- Kategori -->
+                                <td class="align-middle"><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
+
+                                <!-- Divisi -->
+                                <td class="align-middle"><?= htmlspecialchars($t['division_name'] ?? '-') ?></td>
+
+                                <!-- Prioritas -->
+                                <td class="text-center align-middle"><?= priorityBadge($t['division_priority'] ?? '') ?></td>
+
+                                <!-- Bukti -->
+                                <td class="text-center align-middle">
+                                    <?php $atts = getTicketAttachments($t['id']); if (!empty($atts)): ?>
+                                        <?php foreach ($atts as $a): ?>
+                                        <a href="<?= getBaseUrl() . htmlspecialchars($a['filepath']) ?>" target="_blank" class="btn-action btn-action-file" title="<?= htmlspecialchars($a['filename']) ?>"><i class="fas fa-paperclip"></i> Lampiran</a>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- Kesulitan -->
+                                <td class="text-center align-middle"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
+
+                                <!-- Status -->
+                                <td class="text-center align-middle">
                                     <?php if ($st === 'IN_PROGRESS'): ?>
-                                    <!-- Tombol untuk tiket IN_PROGRESS -->
-                                    <button type="button" class="btn btn-warning btn-sm pending-btn"
-                                            data-id="<?= htmlspecialchars($t['id']) ?>"
-                                            data-code="<?= htmlspecialchars($t['code'] ?? '') ?>"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#pendingModal"
-                                            title="Pending Tiket">
-                                        <i class="fas fa-pause-circle"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-success btn-sm resolve-btn"
-                                            data-id="<?= htmlspecialchars($t['id']) ?>"
-                                            data-code="<?= htmlspecialchars($t['code'] ?? '') ?>"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#resolveModal"
-                                            title="Selesaikan Tiket">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <form method="POST" class="d-inline unclaim-form" data-ticket="<?= htmlspecialchars($t['code'] ?? '') ?>">
-                                        <input type="hidden" name="unclaim_id" value="<?= htmlspecialchars($t['id']) ?>">
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm" title="Lepas Tiket">
-                                            <i class="fas fa-hand-paper"></i>
-                                        </button>
-                                    </form>
+                                        <span class="badge badge-status-in_progress">Diproses</span>
+                                    <?php elseif ($st === 'PENDING'): ?>
+                                        <span class="badge badge-status-pending">Tertunda</span>
                                     <?php endif; ?>
+                                </td>
 
-                                    <?php if ($st === 'PENDING'): ?>
-                                    <!-- Tombol untuk tiket PENDING -->
-                                    <form method="POST" class="d-inline resume-form" data-ticket="<?= htmlspecialchars($t['code'] ?? '') ?>">
-                                        <input type="hidden" name="resume_id" value="<?= htmlspecialchars($t['id']) ?>">
-                                        <button type="submit" class="btn btn-primary btn-sm" title="Lanjutkan Tiket">
-                                            <i class="fas fa-play"></i>
+                                <!-- Aksi -->
+                                <td class="text-center align-middle">
+                                    <div class="d-inline-flex align-items-center gap-1 flex-wrap justify-content-center">
+                                        <!-- Chat (selalu tampil) -->
+                                        <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($t['id']) ?>" class="btn-action btn-action-chat">
+                                            <i class="fas fa-comments"></i> Chat
+                                        </a>
+
+                                        <?php if ($st === 'IN_PROGRESS'): ?>
+                                        <!-- Pending -->
+                                        <button type="button" class="btn-action btn-action-pause pending-btn"
+                                                data-id="<?= htmlspecialchars($t['id']) ?>"
+                                                data-code="<?= htmlspecialchars($t['code'] ?? '') ?>"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#pendingModal">
+                                            <i class="fas fa-pause"></i> Pending
                                         </button>
-                                    </form>
-                                    <button type="button" class="btn btn-success btn-sm resolve-btn"
-                                            data-id="<?= htmlspecialchars($t['id']) ?>"
-                                            data-code="<?= htmlspecialchars($t['code'] ?? '') ?>"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#resolveModal"
-                                            title="Selesaikan Tiket">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <?php endif; ?>
+
+                                        <!-- Selesai -->
+                                        <button type="button" class="btn-action btn-action-check resolve-btn"
+                                                data-id="<?= htmlspecialchars($t['id']) ?>"
+                                                data-code="<?= htmlspecialchars($t['code'] ?? '') ?>"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#resolveModal">
+                                            <i class="fas fa-check"></i> Selesai
+                                        </button>
+
+                                        <!-- Lepas -->
+                                        <form method="POST" class="d-inline unclaim-form" data-ticket="<?= htmlspecialchars($t['code'] ?? '') ?>">
+                                            <input type="hidden" name="unclaim_id" value="<?= htmlspecialchars($t['id']) ?>">
+                                            <button type="submit" class="btn-action btn-action-hand" title="Lepas Tiket">
+                                                <i class="fas fa-hand-paper"></i> Lepas
+                                            </button>
+                                        </form>
+                                        <?php endif; ?>
+
+                                        <?php if ($st === 'PENDING'): ?>
+                                        <!-- Lanjutkan -->
+                                        <form method="POST" class="d-inline resume-form" data-ticket="<?= htmlspecialchars($t['code'] ?? '') ?>">
+                                            <input type="hidden" name="resume_id" value="<?= htmlspecialchars($t['id']) ?>">
+                                            <button type="submit" class="btn-action btn-action-play">
+                                                <i class="fas fa-play"></i> Lanjutkan
+                                            </button>
+                                        </form>
+
+                                        <!-- Selesai -->
+                                        <button type="button" class="btn-action btn-action-check resolve-btn"
+                                                data-id="<?= htmlspecialchars($t['id']) ?>"
+                                                data-code="<?= htmlspecialchars($t['code'] ?? '') ?>"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#resolveModal">
+                                            <i class="fas fa-check"></i> Selesai
+                                        </button>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -200,7 +239,7 @@ include '../../includes/header.php';
                 <form method="POST">
                     <input type="hidden" name="pending_id" id="pending_id">
                     <div class="modal-header">
-                        <h5 class="modal-title">Pending Tiket</h5>
+                        <h5 class="modal-title"><i class="fas fa-pause-circle me-2" style="color:#8c57ff;"></i>Pending Tiket</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -213,7 +252,7 @@ include '../../includes/header.php';
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-pause-circle me-1"></i>Pending Tiket
+                            <i class="fas fa-pause me-1"></i>Pending Tiket
                         </button>
                     </div>
                 </form>
@@ -228,7 +267,7 @@ include '../../includes/header.php';
                 <form method="POST">
                     <input type="hidden" name="resolve_id" id="resolve_id">
                     <div class="modal-header">
-                        <h5 class="modal-title">Selesaikan Tiket</h5>
+                        <h5 class="modal-title"><i class="fas fa-check-circle me-2" style="color:#8c57ff;"></i>Selesaikan Tiket</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -282,7 +321,7 @@ include '../../includes/header.php';
                     text: 'Tiket ' + ticketCode + ' akan kembali ke status Diproses',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: '#0d6efd',
+                    confirmButtonColor: '#8c57ff',
                     cancelButtonColor: '#6c757d',
                     confirmButtonText: 'Ya, Lanjutkan',
                     cancelButtonText: 'Batal'
@@ -303,7 +342,7 @@ include '../../includes/header.php';
                     text: 'Tiket ' + ticketCode + ' akan dilepas dan kembali ke status Terbuka',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#ffc107',
+                    confirmButtonColor: '#8c57ff',
                     cancelButtonColor: '#6c757d',
                     confirmButtonText: 'Ya, Lepas',
                     cancelButtonText: 'Batal'

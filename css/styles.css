@@ -11288,88 +11288,13 @@ body {
   color: #AF6900;
 }
 
-
-#datatablesSimpleTicket th:nth-child(1),
-#datatablesSimpleTicket th:nth-child(2),
-#datatablesSimpleTicket th:nth-child(3),
-#datatablesSimpleTicket th:nth-child(4),
-#datatablesSimpleTicket th:nth-child(5),
-#datatablesSimpleTicket th:nth-child(6),
-#datatablesSimpleTicket th:nth-child(7),
-#datatablesSimpleTicket th:nth-child(8),
-#datatablesSimpleTicket td:nth-child(1),
-#datatablesSimpleTicket td:nth-child(2),
-#datatablesSimpleTicket td:nth-child(4),
-#datatablesSimpleTicket td:nth-child(5),
-#datatablesSimpleTicket td:nth-child(7),
-#datatablesSimpleTicket td:nth-child(8) {
-  text-align: center;
+/* badge-subtle-primary */
+.badge-subtle-primary {
+  background-color: #ebe5ff;
+  color: #8c57ff;
 }
 
-#datatablesSimpleTicket td:nth-child(1),
-#datatablesSimpleTicket td:nth-child(2),
-#datatablesSimpleTicket td:nth-child(3),
-#datatablesSimpleTicket td:nth-child(4),
-#datatablesSimpleTicket td:nth-child(5),
-#datatablesSimpleTicket td:nth-child(7),
-#datatablesSimpleTicket td:nth-child(8) {
-  vertical-align: middle;
-}
-
-#datatablesSimpleTicket th:nth-child(1) {
-  width: 50px;
-}
-  
-#datatablesSimpleTicket th:nth-child(2) {
-  width: 7%;
-}
-
-#datatablesSimpleTicket th:nth-child(3) {
-  width: 15%;
-}
-
-/* #datatablesSimpleTicket th:nth-child(4) {
-  width: 10%;
-} */
-
-/* #datatablesSimpleTicket th:nth-child(5) {
-  width: 10%;
-} */
-
-#datatablesSimpleTicket th:nth-child(7) {
-  width: 10%;
-}
-
-#datatablesSimpleTicket th:nth-child(8) {
-  width: 15%;
-}
-
-/* Table akun */
-#datatablesSimpleAkun td:nth-child(1),
-#datatablesSimpleAkun td:nth-child(2),
-#datatablesSimpleAkun td:nth-child(3),
-#datatablesSimpleAkun td:nth-child(4),
-#datatablesSimpleAkun td:nth-child(5),
-#datatablesSimpleAkun td:nth-child(6) {
-  vertical-align: middle;
-}
-
-#datatablesSimpleAkun th:nth-child(1),
-#datatablesSimpleAkun th:nth-child(2),
-#datatablesSimpleAkun th:nth-child(3),
-#datatablesSimpleAkun th:nth-child(4),
-#datatablesSimpleAkun th:nth-child(5),
-#datatablesSimpleAkun th:nth-child(6),
-#datatablesSimpleAkun td:nth-child(1),
-#datatablesSimpleAkun td:nth-child(2),
-#datatablesSimpleAkun td:nth-child(4),
-#datatablesSimpleAkun td:nth-child(5),
-#datatablesSimpleAkun td:nth-child(6) {
-  text-align: center;
-}
-
-/* chat */
-
+/* Chat */
 .chat-box {
   height: 500px;
   overflow-y: auto;
@@ -11401,12 +11326,12 @@ body {
   min-width: 1300px;
 }
 
-/* badge difficulty */
+/* Badge overrides */
 .badge.bg-success { background-color: #198754 !important; }
 .badge.bg-warning { background-color: #ffc107 !important; color: #000; }
 .badge.bg-danger { background-color: #dc3545 !important; }
 
-/* form purple header */
+/* Form purple header */
 .form-header-purple {
   font-weight: bold;
   font-size: 30px;
@@ -11414,13 +11339,13 @@ body {
   background-color: #8c57ff;
 }
 
-/* card header icon color */
+/* Card header icon color */
 .card-header i.fas,
 .card-header i.fab {
   color: #8c57ff;
 }
 
-/* smooth transitions */
+/* Smooth transitions */
 .card {
   transition: box-shadow 0.2s ease;
 }
@@ -11433,7 +11358,6 @@ body {
    TABLE UI IMPROVEMENTS
    ============================================================ */
 
-/* Table base */
 .table {
   font-size: 0.875rem;
   margin-bottom: 0;
@@ -11456,6 +11380,11 @@ body {
 .table tbody td {
   vertical-align: middle;
   padding: 0.5rem;
+}
+
+/* Generic table alignment helper classes */
+.td-center {
+  text-align: center !important;
 }
 
 /* Badge alignment in tables */
@@ -11482,6 +11411,7 @@ body {
 .table td.text-nowrap {
   text-align: center;
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 /* File attachment buttons in table */
@@ -11497,20 +11427,17 @@ body {
   border-radius: 0.25rem;
 }
 
-/* Priority badge alignment */
+/* Badge alignment & sizing - normalize all badges */
 .table .badge.bg-danger,
 .table .badge.bg-warning,
-.table .badge.bg-success {
-  min-width: 60px;
-  display: inline-block;
-  text-align: center;
-}
-
-/* Difficulty badge alignment */
 .table .badge.bg-success,
-.table .badge.bg-warning,
-.table .badge.bg-danger {
-  min-width: 55px;
+.table .badge.bg-primary,
+.table .badge.bg-info,
+.table .badge.bg-secondary,
+.table [class*="badge-status-"],
+.table [class*="badge-priority-"],
+.table [class*="badge-diff-"] {
+  min-width: 75px;
   display: inline-block;
   text-align: center;
 }
@@ -11518,7 +11445,8 @@ body {
 /* Table responsive wrapper */
 .table-responsive {
   border-radius: 0.5rem;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Action button group spacing */
@@ -11533,4 +11461,154 @@ body {
   display: inline-block !important;
   margin: 0;
   vertical-align: middle;
+}
+
+/* ============================================================
+   NAVBAR & DROPDOWN RESPONSIVE
+   ============================================================ */
+
+/* Navbar */
+.sb-topnav {
+  padding: 0 0.5rem;
+  min-height: 56px;
+}
+
+.sb-topnav .navbar-brand {
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+/* Dropdown menu */
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+.dropdown-menu {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.dropdown-menu .dropdown-item {
+  padding: 0.5rem 1rem;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.dropdown-menu .dropdown-item.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Notification dropdown responsive */
+@media (max-width: 575.98px) {
+  .dropdown-menu[style*="width"] {
+    width: calc(100vw - 2rem) !important;
+    max-width: 320px;
+    right: 0.5rem;
+  }
+  
+  .sb-topnav .navbar-brand span {
+    display: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .dropdown-menu {
+    font-size: 0.8rem;
+  }
+  
+  .dropdown-menu .dropdown-item {
+    padding: 0.4rem 0.75rem;
+  }
+}
+
+/* Sidebar mobile toggle */
+@media (max-width: 991.98px) {
+  #layoutSidenav_content {
+    padding-left: 0;
+  }
+}
+
+/* ============================================================
+   SOLID BADGES (High Contrast)
+   ============================================================ */
+.badge-status-open        { background: #198754 !important; color: #fff !important; }
+.badge-status-in_progress { background: #0d6efd !important; color: #fff !important; }
+.badge-status-pending     { background: #ffc107 !important; color: #000 !important; }
+.badge-status-resolved    { background: #0dcaf0 !important; color: #000 !important; }
+.badge-status-closed      { background: #6c757d !important; color: #fff !important; }
+
+.badge-priority-tinggi { background: #dc3545 !important; color: #fff !important; }
+.badge-priority-sedang { background: #ffc107 !important; color: #000 !important; }
+.badge-priority-rendah { background: #198754 !important; color: #fff !important; }
+
+.badge-diff-mudah  { background: #198754 !important; color: #fff !important; }
+.badge-diff-sedang { background: #ffc107 !important; color: #000 !important; }
+.badge-diff-sulit  { background: #dc3545 !important; color: #fff !important; }
+
+/* ============================================================
+   BADGE-STYLE ACTION BUTTONS
+   ============================================================ */
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.btn-action i { font-size: 0.7rem; }
+
+.btn-action-chat    { background: #dbeafe; color: #1e40af; }
+.btn-action-pause   { background: #fef3c7; color: #b45309; }
+.btn-action-check   { background: #d1fae5; color: #047857; }
+.btn-action-hand    { background: #e2e8f0; color: #475569; }
+.btn-action-play    { background: #dbeafe; color: #1e40af; }
+.btn-action-edit    { background: #dbeafe; color: #1e40af; }
+.btn-action-delete  { background: #fce4ec; color: #b91c1c; }
+.btn-action-view    { background: #e2e8f0; color: #475569; }
+.btn-action-file    { background: #fef3c7; color: #b45309; }
+.btn-action-danger  { background: #fce4ec; color: #b91c1c; }
+.btn-action-success { background: #d1fae5; color: #047857; }
+
+.btn-action-chat:hover    { background: #bfdbfe; color: #1e40af; }
+.btn-action-pause:hover   { background: #fde68a; color: #b45309; }
+.btn-action-check:hover   { background: #a7f3d0; color: #047857; }
+.btn-action-hand:hover    { background: #cbd5e1; color: #475569; }
+.btn-action-play:hover    { background: #bfdbfe; color: #1e40af; }
+.btn-action-edit:hover    { background: #bfdbfe; color: #1e40af; }
+.btn-action-delete:hover  { background: #fecaca; color: #b91c1c; }
+.btn-action-view:hover    { background: #cbd5e1; color: #475569; }
+.btn-action-file:hover    { background: #fde68a; color: #b45309; }
+.btn-action-danger:hover  { background: #fecaca; color: #b91c1c; }
+.btn-action-success:hover { background: #a7f3d0; color: #047857; }
+
+/* ============================================================
+   TABLE DATE & CODE FORMAT
+   ============================================================ */
+.td-date .date-val {
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.td-date .time-val {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.td-code {
+  font-weight: 600;
+  font-size: 0.85rem;
 }

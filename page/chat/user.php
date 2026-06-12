@@ -83,18 +83,9 @@ include '../../includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td><?= difficultyBadge($ticket['difficulty_level'] ?? 1) ?></td>
+                                    <td><?= statusBadge($ticket['status'] ?? '') ?></td>
                                     <td>
-                                        <?php
-                                        $st = $ticket['status'] ?? '';
-                                        if ($st === 'OPEN') echo '<span class="badge bg-success">Terbuka</span>';
-                                        elseif ($st === 'IN_PROGRESS') echo '<span class="badge bg-primary">Diproses</span>';
-                                        elseif ($st === 'PENDING') echo '<span class="badge bg-warning">Tertunda</span>';
-                                        elseif ($st === 'RESOLVED') echo '<span class="badge bg-info">Selesai</span>';
-                                        else echo '<span class="badge bg-secondary">Ditutup</span>';
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <a href="<?= getBaseUrl() ?>page/tiket/antrian.php" class="btn btn-success btn-sm">Kembali</a>
+                                        <a href="<?= getBaseUrl() ?>page/tiket/antrian.php" class="btn-action btn-action-view"><i class="fas fa-arrow-left"></i> Kembali</a>
                                     </td>
                                 </tr>
                             </tbody>

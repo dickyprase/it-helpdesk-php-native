@@ -5,7 +5,7 @@ if (isLoggedIn()) {
     $role = getCurrentUserRole();
     if ($role === 'MANAGER') header('Location: ' . getBaseUrl() . 'page/dashboard/manager.php');
     elseif ($role === 'STAFF') header('Location: ' . getBaseUrl() . 'page/dashboard/');
-    else header('Location: ' . getBaseUrl() . 'page/tiket/buat.php');
+    else header('Location: ' . getBaseUrl() . 'page/dashboard/user.php');
     exit;
 }
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $role = getCurrentUserRole();
                 if ($role === 'MANAGER') header('Location: ' . getBaseUrl() . 'page/dashboard/manager.php');
                 elseif ($role === 'STAFF') header('Location: ' . getBaseUrl() . 'page/dashboard/');
-                else header('Location: ' . getBaseUrl() . 'page/tiket/buat.php');
+                else header('Location: ' . getBaseUrl() . 'page/dashboard/user.php');
                 exit;
             } else {
                 $error = $result['message'];

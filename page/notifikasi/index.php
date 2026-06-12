@@ -26,7 +26,9 @@ include '../../includes/header.php';
                     </div>
                     <?php if (!empty($notifications)): ?>
                     <form method="POST" class="d-inline">
-                        <button type="submit" name="mark_all" class="btn btn-sm btn-outline-primary">Tandai Semua Dibaca</button>
+                        <button type="submit" name="mark_all" class="btn btn-sm" style="background:#8c57ff; color:#fff; border-radius:8px; padding:0.35rem 0.75rem; font-weight:500;">
+                            <i class="fas fa-check-double me-1"></i>Tandai Semua Dibaca
+                        </button>
                     </form>
                     <?php endif; ?>
                 </div>

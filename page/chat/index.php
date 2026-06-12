@@ -104,20 +104,11 @@ include '../../includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td><?= difficultyBadge($ticket['difficulty_level'] ?? 1) ?></td>
-                                    <td>
-                                        <?php
-                                        $st = $ticket['status'] ?? '';
-                                        if ($st === 'IN_PROGRESS') echo '<span class="badge bg-primary">Diproses</span>';
-                                        elseif ($st === 'PENDING') echo '<span class="badge bg-warning">Tertunda</span>';
-                                        elseif ($st === 'RESOLVED') echo '<span class="badge bg-info">Selesai</span>';
-                                        elseif ($st === 'CLOSED') echo '<span class="badge bg-secondary">Ditutup</span>';
-                                        else echo '<span class="badge bg-success">Terbuka</span>';
-                                        ?>
-                                    </td>
+                                    <td><?= statusBadge($ticket['status'] ?? '') ?></td>
                                     <?php if ($is_in_progress): ?>
                                     <td class="text-nowrap">
-                                        <button class="btn btn-danger btn-sm me-1" data-bs-toggle="modal" data-bs-target="#difficultyModal"><i class="fas fa-gauge-high"></i></button>
-                                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#resolveModal">Selesai</button>
+                                        <button class="btn-action btn-action-danger me-1" data-bs-toggle="modal" data-bs-target="#difficultyModal"><i class="fas fa-gauge-high"></i></button>
+                                        <button class="btn-action btn-action-check" data-bs-toggle="modal" data-bs-target="#resolveModal"><i class="fas fa-check"></i> Selesai</button>
                                     </td>
                                     <?php endif; ?>
                                 </tr>

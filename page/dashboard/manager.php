@@ -100,16 +100,17 @@ include '../../includes/header.php';
                     <?php if (empty($leaderboard)): ?>
                     <p class="text-muted text-center">Belum ada data ranking.</p>
                     <?php else: ?>
+                    <div class="table-responsive">
                     <table id="datatablesSimple">
                         <thead>
                             <tr>
-                                <th>Peringkat</th>
+                                <th class="text-center">Peringkat</th>
                                 <th>Nama</th>
                                 <th>Email</th>
-                                <th>Total Poin</th>
-                                <th>Tiket Selesai</th>
-                                <th>Rata-rata Poin</th>
-                                <th>Aksi</th>
+                                <th class="text-center">Total Poin</th>
+                                <th class="text-center">Tiket Selesai</th>
+                                <th class="text-center">Rata-rata Poin</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,7 +121,7 @@ include '../../includes/header.php';
                             $rank_class = $no === 1 ? 'table-warning' : ($no === 2 ? 'table-light' : ($no === 3 ? 'table-danger' : ''));
                             ?>
                             <tr class="<?= $rank_class ?>">
-                                <td>
+                                <td class="text-center align-middle">
                                     <?php if ($no === 1): ?>
                                     <span class="badge bg-warning text-dark"><i class="fas fa-crown"></i> 1</span>
                                     <?php elseif ($no === 2): ?>
@@ -131,21 +132,22 @@ include '../../includes/header.php';
                                     <?= $no ?>
                                     <?php endif; ?>
                                 </td>
-                                <td><strong><?= htmlspecialchars($lb['staff_name'] ?? '-') ?></strong></td>
-                                <td><?= htmlspecialchars($lb['staff_email'] ?? '-') ?></td>
-                                <td><span class="fs-5 fw-bold" style="color: #8c57ff;"><?= $lb['total_points'] ?? 0 ?></span></td>
-                                <td><?= $lb['tickets_closed'] ?? 0 ?></td>
-                                <td><?= $avg ?> poin/tiket</td>
-                                <td>
+                                <td class="align-middle"><strong><?= htmlspecialchars($lb['staff_name'] ?? '-') ?></strong></td>
+                                <td class="align-middle"><?= htmlspecialchars($lb['staff_email'] ?? '-') ?></td>
+                                <td class="text-center align-middle"><span class="fs-5 fw-bold" style="color: #8c57ff;"><?= $lb['total_points'] ?? 0 ?></span></td>
+                                <td class="text-center align-middle"><?= $lb['tickets_closed'] ?? 0 ?></td>
+                                <td class="text-center align-middle"><?= $avg ?> poin/tiket</td>
+                                <td class="text-center align-middle">
                                     <a href="?view=<?= $view ?>&month=<?= $month ?>&year=<?= $year ?>&staff_id=<?= urlencode($lb['staff_id']) ?>" 
-                                       class="btn btn-sm <?= $is_selected ? 'btn-primary' : 'btn-outline-primary' ?>">
-                                        <i class="fas fa-eye me-1"></i>Detail
+                                       class="btn-action <?= $is_selected ? 'btn-action-chat' : 'btn-action-view' ?>">
+                                        <i class="fas fa-eye"></i> Detail
                                     </a>
                                 </td>
                             </tr>
                             <?php $no++; endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -238,36 +240,44 @@ include '../../includes/header.php';
 
                     <!-- Ticket Detail Table -->
                     <h6 class="mb-3"><i class="fas fa-list me-1"></i>Riwayat Tiket Selesai</h6>
+                    <div class="table-responsive">
                     <table id="datatablesSimpleTicket" class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>No</th>
+                                <th class="text-center">No</th>
                                 <th>Kode Tiket</th>
                                 <th>Judul</th>
                                 <th>Kategori</th>
                                 <th>User</th>
-                                <th>Kesulitan</th>
-                                <th>Poin</th>
+                                <th class="text-center">Kesulitan</th>
+                                <th class="text-center">Poin</th>
                                 <th>Catatan Admin</th>
                                 <th>Tanggal</th>
+                                <th class="text-center">Riwayat</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php $no = 1; foreach ($detail_data as $d): ?>
                             <tr>
-                                <td><?= $no++ ?></td>
-                                <td><code><?= htmlspecialchars($d['ticket_code'] ?? '-') ?></code></td>
-                                <td><?= htmlspecialchars(potongTeks($d['ticket_title'] ?? '', 50)) ?></td>
-                                <td><?= htmlspecialchars($d['category_name'] ?? '-') ?></td>
-                                <td><?= htmlspecialchars($d['user_name'] ?? '-') ?></td>
-                                <td><?= difficultyBadge($d['difficulty_level'] ?? 1) ?></td>
-                                <td><strong><?= $d['points'] ?? 0 ?></strong></td>
-                                <td><?= htmlspecialchars($d['admin_note'] ?? '-') ?></td>
-                                <td><?= formatTanggal($d['created_at'] ?? '') ?></td>
+                                <td class="text-center align-middle"><?= $no++ ?></td>
+                                <td class="align-middle td-code"><code><?= htmlspecialchars($d['ticket_code'] ?? '-') ?></code></td>
+                                <td class="align-middle"><?= htmlspecialchars(potongTeks($d['ticket_title'] ?? '', 50)) ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($d['category_name'] ?? '-') ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($d['user_name'] ?? '-') ?></td>
+                                <td class="text-center align-middle"><?= difficultyBadge($d['difficulty_level'] ?? 1) ?></td>
+                                <td class="text-center align-middle"><strong><?= $d['points'] ?? 0 ?></strong></td>
+                                <td class="align-middle"><?= htmlspecialchars($d['admin_note'] ?? '-') ?></td>
+                                <td class="align-middle td-date"><div class="date-val"><?= formatTanggal($d['created_at'] ?? '') ?></div></td>
+                                <td class="text-center align-middle">
+                                    <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($d['ticket_id'] ?? '') ?>" class="btn-action btn-action-view" title="Lihat Riwayat Chat">
+                                        <i class="fas fa-comments"></i> Chat
+                                    </a>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
             <?php elseif ($detail_staff_id && empty($detail_data)): ?>

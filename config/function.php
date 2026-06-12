@@ -1240,13 +1240,13 @@ function potongTeks($text, $max = 100) {
 
 function statusBadge($status) {
     $map = [
-        'OPEN'        => ['bg-success', 'Terbuka'],
-        'IN_PROGRESS' => ['bg-primary', 'Diproses'],
-        'PENDING'     => ['bg-warning', 'Tertunda'],
-        'RESOLVED'    => ['bg-info', 'Selesai'],
-        'CLOSED'      => ['bg-secondary', 'Ditutup'],
+        'OPEN'        => ['badge-status-open', 'Terbuka'],
+        'IN_PROGRESS' => ['badge-status-in_progress', 'Diproses'],
+        'PENDING'     => ['badge-status-pending', 'Tertunda'],
+        'RESOLVED'    => ['badge-status-resolved', 'Selesai'],
+        'CLOSED'      => ['badge-status-closed', 'Ditutup'],
     ];
-    $s = $map[$status] ?? ['bg-dark', $status];
+    $s = $map[$status] ?? ['badge-status-closed', $status];
     return '<span class="badge ' . $s[0] . '">' . $s[1] . '</span>';
 }
 
@@ -1309,20 +1309,20 @@ function getChartDataProgress($year = null) {
 
 function difficultyBadge($level) {
     $map = [
-        1 => ['bg-success', 'Mudah'],
-        2 => ['bg-warning', 'Sedang'],
-        3 => ['bg-danger', 'Sulit'],
+        1 => ['badge-diff-mudah', 'Mudah'],
+        2 => ['badge-diff-sedang', 'Sedang'],
+        3 => ['badge-diff-sulit', 'Sulit'],
     ];
-    $s = $map[(int)$level] ?? ['bg-secondary', '-'];
+    $s = $map[(int)$level] ?? ['badge-diff-mudah', '-'];
     return '<span class="badge ' . $s[0] . '">' . $s[1] . '</span>';
 }
 
 function priorityBadge($level) {
     $map = [
-        'TINGGI'  => ['bg-danger', 'Tinggi'],
-        'SEDANG'  => ['bg-warning', 'Sedang'],
-        'RENDAH'  => ['bg-success', 'Rendah'],
+        'TINGGI'  => ['badge-priority-tinggi', 'Tinggi'],
+        'SEDANG'  => ['badge-priority-sedang', 'Sedang'],
+        'RENDAH'  => ['badge-priority-rendah', 'Rendah'],
     ];
-    $s = $map[$level] ?? ['bg-secondary', '-'];
+    $s = $map[$level] ?? ['badge-priority-sedang', '-'];
     return '<span class="badge ' . $s[0] . '">' . $s[1] . '</span>';
 }

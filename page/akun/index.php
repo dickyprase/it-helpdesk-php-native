@@ -71,13 +71,13 @@ include '../../includes/header.php';
             <div class="alert alert-danger mt-3"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
 
-            <div class="row mt-4">
+            <div class="row mt-4 align-items-stretch">
                 <!-- Form Buat User Baru -->
-                <div class="col-md-12 col-xl-4">
-                    <div class="card shadow p-3 mb-4 bg-body rounded">
-                        <div class="card-body text-center rounded" style="font-weight: bold; font-size: 30px; color: #fff; background-color: #8c57ff;">Form User Baru</div>
+                <div class="col-md-12 col-xl-4 mb-4">
+                    <div class="card shadow p-3 bg-body rounded h-100">
+                        <div class="card-body text-center rounded" style="font-weight: bold; font-size: 30px; color: #fff; background-color: #8c57ff; flex: 0 0 auto;">Form User Baru</div>
                         <hr>
-                        <form method="POST">
+                        <form method="POST" style="flex: 1 1 auto; display: flex; flex-direction: column;">
                             <div class="mb-3">
                                 <label for="nama" class="form-label">Nama :</label>
                                 <input type="text" class="form-control" name="nama" id="nama" required minlength="2">
@@ -113,7 +113,7 @@ include '../../includes/header.php';
                                 <label for="password" class="form-label">Password :</label>
                                 <input type="password" class="form-control" name="password" id="password" required minlength="6">
                             </div>
-                            <div class="text-end">
+                            <div class="text-end mt-auto">
                                 <button type="submit" name="create_user" value="1" class="btn btn-success"><i class="fas fa-plus me-1"></i>Buat Akun</button>
                             </div>
                         </form>
@@ -121,45 +121,46 @@ include '../../includes/header.php';
                 </div>
 
                 <!-- Daftar User -->
-                <div class="col-md-12 col-xl-8">
-                    <div class="card mb-4 shadow p-3 mb-5 bg-body rounded">
+                <div class="col-md-12 col-xl-8 mb-4">
+                    <div class="card shadow p-3 bg-body rounded h-100">
                         <div class="card-header">
                             <i class="fas fa-user me-1" style="color: #8c57ff;"></i>
                             Akun User (<?= count($users) ?>)
                         </div>
                         <div class="card-body">
+                            <div class="table-responsive">
                             <table id="datatablesSimpleAkun">
                                 <thead>
                                     <tr>
-                                        <th>No</th>
+                                        <th class="text-center">No</th>
                                         <th>Nama</th>
                                         <th>Email</th>
                                         <th>Divisi</th>
-                                        <th>Prioritas</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
+                                        <th class="text-center">Prioritas</th>
+                                        <th class="text-center">Role</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php $no = 1; foreach ($users as $u): ?>
                                     <tr>
-                                        <td class="text-center"><?= $no++ ?></td>
-                                        <td><?= htmlspecialchars($u['name'] ?? '-') ?></td>
-                                        <td><?= htmlspecialchars($u['email'] ?? '-') ?></td>
-                                        <td><?= htmlspecialchars($u['division_name'] ?? '-') ?></td>
-                                        <td class="text-center"><?= priorityBadge($u['division_priority'] ?? '') ?></td>
-                                        <td class="text-center"><span class="badge bg-secondary"><?= htmlspecialchars($u['role'] ?? '-') ?></span></td>
-                                        <td class="text-center">
+                                        <td class="text-center align-middle"><?= $no++ ?></td>
+                                        <td class="align-middle"><?= htmlspecialchars($u['name'] ?? '-') ?></td>
+                                        <td class="align-middle"><?= htmlspecialchars($u['email'] ?? '-') ?></td>
+                                        <td class="align-middle"><?= htmlspecialchars($u['division_name'] ?? '-') ?></td>
+                                        <td class="text-center align-middle"><?= priorityBadge($u['division_priority'] ?? '') ?></td>
+                                        <td class="text-center align-middle"><span class="badge bg-secondary"><?= htmlspecialchars($u['role'] ?? '-') ?></span></td>
+                                        <td class="text-center align-middle">
                                             <?php if ($u['is_active'] ?? true): ?>
                                                 <span class="badge bg-success">Aktif</span>
                                             <?php else: ?>
                                                 <span class="badge bg-danger">Non Aktif</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-center text-nowrap">
-                                            <button type="button" class="btn btn-success btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modal-<?= htmlspecialchars($u['id']) ?>" title="Ubah">
-                                                <i class="fas fa-edit"></i>
+                                        <td class="text-center align-middle text-nowrap">
+                                            <button type="button" class="btn-action btn-action-edit me-1" data-bs-toggle="modal" data-bs-target="#modal-<?= htmlspecialchars($u['id']) ?>" title="Ubah">
+                                                <i class="fas fa-edit"></i> Ubah
                                             </button>
 
                                             <div class="modal fade" id="modal-<?= htmlspecialchars($u['id']) ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
@@ -217,12 +218,12 @@ include '../../includes/header.php';
                                             <form method="POST" class="d-inline toggle-form" data-active="<?= ($u['is_active'] ?? true) ? '1' : '0' ?>" data-name="<?= htmlspecialchars($u['name'] ?? '') ?>">
                                                 <input type="hidden" name="toggle_id" value="<?= htmlspecialchars($u['id']) ?>">
                                                 <?php if ($u['is_active'] ?? true): ?>
-                                                    <button type="submit" class="btn btn-danger btn-sm" title="Nonaktifkan">
-                                                        <i class="fas fa-ban"></i>
+                                                    <button type="submit" class="btn-action btn-action-danger" title="Nonaktifkan">
+                                                        <i class="fas fa-ban"></i> Blokir
                                                     </button>
                                                 <?php else: ?>
-                                                    <button type="submit" class="btn btn-success btn-sm" title="Aktifkan">
-                                                        <i class="fas fa-check"></i>
+                                                    <button type="submit" class="btn-action btn-action-success" title="Aktifkan">
+                                                        <i class="fas fa-check"></i> Aktifkan
                                                     </button>
                                                 <?php endif; ?>
                                             </form>
@@ -231,6 +232,7 @@ include '../../includes/header.php';
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>

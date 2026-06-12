@@ -61,43 +61,45 @@ include '../../includes/header.php';
                         <p>Tidak ada tiket yang menunggu validasi.</p>
                     </div>
                     <?php else: ?>
+                    <div class="table-responsive">
                     <table id="datatablesSimpleTicket">
                         <thead>
                             <tr>
-                                <th>No</th>
+                                <th class="text-center">No</th>
                                 <th>No Tiket</th>
                                 <th>Nama User</th>
                                 <th>Staff</th>
                                 <th>Tanggal</th>
                                 <th>Deskripsi</th>
                                 <th>Kategori</th>
-                                <th>Kesulitan</th>
-                                <th>Aksi</th>
+                                <th class="text-center">Kesulitan</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php $no = 1; foreach ($tickets as $t): ?>
                             <tr>
-                                <td class="text-center"><?= $no++ ?></td>
-                                <td><code><?= htmlspecialchars($t['code'] ?? '-') ?></code></td>
-                                <td><?= htmlspecialchars($t['user_name'] ?? '-') ?></td>
-                                <td><?= htmlspecialchars($t['staff_name'] ?? '-') ?></td>
-                                <td class="text-center"><?= formatTanggal($t['created_at'] ?? '') ?></td>
-                                <td><?= htmlspecialchars(potongTeks($t['description'] ?? '', 60)) ?></td>
-                                <td><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
-                                <td class="text-center"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
-                                <td class="text-center text-nowrap">
-                                    <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($t['id']) ?>" class="btn btn-warning btn-sm me-1" title="Riwayat Chat">
-                                        <i class="fas fa-history"></i>
+                                <td class="text-center align-middle"><?= $no++ ?></td>
+                                <td class="align-middle td-code"><code><?= htmlspecialchars($t['code'] ?? '-') ?></code></td>
+                                <td class="align-middle"><?= htmlspecialchars($t['user_name'] ?? '-') ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($t['staff_name'] ?? '-') ?></td>
+                                <td class="align-middle td-date"><div class="date-val"><?= formatTanggal($t['created_at'] ?? '') ?></div></td>
+                                <td class="align-middle"><?= htmlspecialchars(potongTeks($t['description'] ?? '', 60)) ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
+                                <td class="text-center align-middle"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
+                                <td class="text-center align-middle text-nowrap">
+                                    <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($t['id']) ?>" class="btn-action btn-action-view" title="Riwayat Chat">
+                                        <i class="fas fa-history"></i> Riwayat
                                     </a>
-                                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modal-<?= htmlspecialchars($t['id']) ?>" title="Validasi">
-                                        <i class="fas fa-check me-1"></i>Validasi
+                                    <button class="btn-action btn-action-check ms-1" data-bs-toggle="modal" data-bs-target="#modal-<?= htmlspecialchars($t['id']) ?>" title="Validasi">
+                                        <i class="fas fa-check"></i> Validasi
                                     </button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>

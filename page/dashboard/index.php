@@ -84,28 +84,30 @@ include '../../includes/header.php';
                     <?php if (empty($leaderboard)): ?>
                     <p class="text-muted text-center">Belum ada data ranking bulan ini.</p>
                     <?php else: ?>
+                    <div class="table-responsive">
                     <table id="datatablesSimple">
                         <thead>
                             <tr>
-                                <th>No</th>
+                                <th class="text-center">No</th>
                                 <th>Nama</th>
                                 <th>Email</th>
-                                <th>Poin</th>
-                                <th>Tiket Selesai</th>
+                                <th class="text-center">Poin</th>
+                                <th class="text-center">Tiket Selesai</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php $no = 1; foreach ($leaderboard as $lb): ?>
                             <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= htmlspecialchars($lb['staff_name'] ?? '-') ?></td>
-                                <td><?= htmlspecialchars($lb['staff_email'] ?? '-') ?></td>
-                                <td><strong><?= $lb['total_points'] ?? 0 ?></strong></td>
-                                <td><?= $lb['tickets_closed'] ?? 0 ?></td>
+                                <td class="text-center align-middle"><?= $no++ ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($lb['staff_name'] ?? '-') ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($lb['staff_email'] ?? '-') ?></td>
+                                <td class="text-center align-middle"><strong><?= $lb['total_points'] ?? 0 ?></strong></td>
+                                <td class="text-center align-middle"><?= $lb['tickets_closed'] ?? 0 ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>

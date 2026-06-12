@@ -22,56 +22,56 @@ include '../../includes/header.php';
                         <p>Belum ada tiket yang selesai.</p>
                     </div>
                     <?php else: ?>
+                    <div class="table-responsive">
                     <table id="datatablesSimpleTicket">
                         <thead>
                             <tr>
-                                <th>No</th>
+                                <th class="text-center">No</th>
                                 <th>No Tiket</th>
                                 <th>Nama</th>
                                 <th>Tanggal</th>
                                 <th>Deskripsi Kendala</th>
                                 <th>Kategori</th>
                                 <th>Divisi</th>
-                                <th>Prioritas</th>
-                                <th>Bukti</th>
-                                <th>Kesulitan</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
+                                <th class="text-center">Prioritas</th>
+                                <th class="text-center">Bukti</th>
+                                <th class="text-center">Kesulitan</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php $no = 1; foreach ($tickets as $t): ?>
                             <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= htmlspecialchars($t['code'] ?? '-') ?></td>
-                                <td><?= htmlspecialchars($t['user_name'] ?? '-') ?></td>
-                                <td><?= formatTanggal($t['created_at'] ?? '') ?></td>
-                                <td><?= htmlspecialchars(potongTeks($t['description'] ?? '', 80)) ?></td>
-                                <td><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
-                                <td><?= htmlspecialchars($t['division_name'] ?? '-') ?></td>
-                                <td><?= priorityBadge($t['division_priority'] ?? '') ?></td>
-                                <td>
+                                <td class="text-center align-middle"><?= $no++ ?></td>
+                                <td class="align-middle td-code"><?= htmlspecialchars($t['code'] ?? '-') ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($t['user_name'] ?? '-') ?></td>
+                                <td class="align-middle td-date">
+                                    <div class="date-val"><?= formatTanggal($t['created_at'] ?? '') ?></div>
+                                </td>
+                                <td class="align-middle"><?= htmlspecialchars(potongTeks($t['description'] ?? '', 80)) ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($t['category_name'] ?? '-') ?></td>
+                                <td class="align-middle"><?= htmlspecialchars($t['division_name'] ?? '-') ?></td>
+                                <td class="text-center align-middle"><?= priorityBadge($t['division_priority'] ?? '') ?></td>
+                                <td class="text-center align-middle">
                                     <?php $atts = getTicketAttachments($t['id']); if (!empty($atts)): foreach ($atts as $a): ?>
-                                    <a href="<?= getBaseUrl() . htmlspecialchars($a['filepath']) ?>" target="_blank" class="btn btn-outline-warning btn-sm" title="Lampiran"><i class="fas fa-paperclip"></i></a>
-                                    <?php endforeach; else: ?>-<?php endif; ?>
+                                    <a href="<?= getBaseUrl() . htmlspecialchars($a['filepath']) ?>" target="_blank" class="btn-action btn-action-file"><i class="fas fa-paperclip"></i> Lampiran</a>
+                                    <?php endforeach; else: ?><span class="text-muted">-</span><?php endif; ?>
                                 </td>
-                                <td class="text-center"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
-                                <td class="text-center">
-                                    <?php if (($t['status'] ?? '') === 'RESOLVED'): ?>
-                                        <span class="badge bg-info">Proses Validasi</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Ditutup</span>
-                                    <?php endif; ?>
+                                <td class="text-center align-middle"><?= difficultyBadge($t['difficulty_level'] ?? 1) ?></td>
+                                <td class="text-center align-middle">
+                                    <?= statusBadge($t['status'] ?? '') ?>
                                 </td>
-                                <td class="text-center">
-                                    <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($t['id']) ?>" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-history me-1"></i>Riwayat
+                                <td class="text-center align-middle text-nowrap">
+                                    <a href="<?= getBaseUrl() ?>page/chat/?id=<?= htmlspecialchars($t['id']) ?>" class="btn-action btn-action-view">
+                                        <i class="fas fa-history"></i> Riwayat
                                     </a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
