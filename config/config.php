@@ -13,7 +13,7 @@ $url       = $protocol . '://' . $http_host . '/' . $rootName . '/';
 // Koneksi MySQL
 $host     = 'localhost';
 $username = 'root';
-$password = '';
+$password = 'hujan123';
 $database = 'helpdesk';
 
 $conn = new mysqli($host, $username, $password, $database);

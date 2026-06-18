@@ -658,7 +658,21 @@ function uploadTicketAttachments($files, $ticket_id) {
     for ($i = 0; $i < $file_count; $i++) {
         if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
 
-        $ext = pathinfo($files['name'][$i], PATHINFO_EXTENSION);
+                $ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg','jpeg','png','gif','bmp','webp','pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv','zip','rar','7z'];
+        $allowed_mime = ['image/jpeg','image/png','image/gif','image/bmp','image/webp','application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.ms-powerpoint','application/vnd.openxmlformats-officedocument.presentationml.presentation','text/plain','text/csv','application/zip','application/x-rar-compressed','application/x-7z-compressed','application/octet-stream'];
+
+        if (!in_array($ext, $allowed_ext)) {
+            return ['status' => false, 'message' => 'Format file .'.$ext.' tidak diizinkan. Format: ' . implode(', ', $allowed_ext)];
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $files['tmp_name'][$i]);
+        finfo_close($finfo);
+
+        if (!in_array($mime, $allowed_mime)) {
+            return ['status' => false, 'message' => 'Tipe MIME tidak diizinkan: ' . $mime];
+        }
         $filename = 'ticket_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $filepath = $upload_dir . $filename;
 
@@ -772,7 +786,22 @@ function uploadChatAttachments($files, $chat_id) {
     for ($i = 0; $i < $file_count; $i++) {
         if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
 
-        $ext = pathinfo($files['name'][$i], PATHINFO_EXTENSION);
+        $ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg','jpeg','png','gif','bmp','webp','pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv','zip','rar','7z'];
+        $allowed_mime = ['image/jpeg','image/png','image/gif','image/bmp','image/webp','application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.ms-powerpoint','application/vnd.openxmlformats-officedocument.presentationml.presentation','text/plain','text/csv','application/zip','application/x-rar-compressed','application/x-7z-compressed','application/octet-stream'];
+
+        if (!in_array($ext, $allowed_ext)) {
+            return ['status' => false, 'message' => 'Format file .'.$ext.' tidak diizinkan. Format: ' . implode(', ', $allowed_ext)];
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $files['tmp_name'][$i]);
+        finfo_close($finfo);
+
+        if (!in_array($mime, $allowed_mime)) {
+            return ['status' => false, 'message' => 'Tipe MIME tidak diizinkan: ' . $mime];
+        }
+
         $filename = 'chat_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $filepath = $upload_dir . $filename;
 

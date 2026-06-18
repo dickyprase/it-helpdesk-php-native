@@ -164,6 +164,13 @@ include '../../includes/header.php';
     var currentUserId = '<?= htmlspecialchars(getCurrentUserId()) ?>';
     var baseUrl = '<?= getBaseUrl() ?>';
     var ticketCode = '<?= htmlspecialchars($ticket['code'] ?? '') ?>';
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        var div = document.createElement("div");
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
     function loadMessages() {
         fetch(baseUrl + 'page/chat/ajax_messages.php?id=' + ticketId)
             .then(r => r.json())
@@ -178,12 +185,12 @@ include '../../includes/header.php';
                         var isOwn = msg.sender_id === currentUserId;
                         html += '<div class="d-flex flex-row ' + (isOwn ? 'justify-content-end' : 'justify-content-start') + ' mb-3">';
                         html += '<div style="max-width: 75%;">';
-                        html += '<div class="small text-muted mb-1 ' + (isOwn ? 'text-end' : '') + '">' + msg.sender_name + ' | ' + ticketCode + '</div>';
-                        html += '<div class="p-2 rounded-3 ' + (isOwn ? 'bg-primary text-white' : 'bg-light') + '" style="word-wrap: break-word;">' + msg.message.replace(/\n/g, '<br>') + '</div>';
+                        html += '<div class="small text-muted mb-1 ' + (isOwn ? 'text-end' : '') + '">' + escapeHtml(msg.sender_name) + ' | ' + ticketCode + '</div>';
+                        html += '<div class="p-2 rounded-3 ' + (isOwn ? 'bg-primary text-white' : 'bg-light') + '" style="word-wrap: break-word;">' + escapeHtml(msg.message).replace(/\n/g, '<br>') + '</div>';
                         if (msg.attachments && msg.attachments.length > 0) {
                             html += '<div class="mt-1">';
                             msg.attachments.forEach(function(att) {
-                                html += '<a href="' + baseUrl + att.filepath + '" target="_blank" class="badge bg-secondary text-decoration-none me-1"><i class="fas fa-paperclip"></i> ' + att.filename.substring(0, 20) + '</a>';
+                                html += '<a href="' + baseUrl + escapeHtml(att.filepath) + '" target="_blank" class="badge bg-secondary text-decoration-none me-1"><i class="fas fa-paperclip"></i> ' + escapeHtml(att.filename).substring(0, 20) + '</a>';
                             });
                             html += '</div>';
                         }
