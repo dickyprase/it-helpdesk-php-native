@@ -644,10 +644,14 @@ function uploadTicketAttachments($files, $ticket_id) {
     $max_total = 75 * 1024 * 1024;
     $total_size = 0;
     $uploaded = [];
+    $errors = [];
 
     $file_count = count($files['name']);
     for ($i = 0; $i < $file_count; $i++) {
-        if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
+        if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+            $errors[] = "File {$files['name'][$i]}: upload error code {$files['error'][$i]}";
+            continue;
+        }
         $total_size += $files['size'][$i];
     }
 
@@ -658,7 +662,7 @@ function uploadTicketAttachments($files, $ticket_id) {
     for ($i = 0; $i < $file_count; $i++) {
         if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
 
-                $ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
+        $ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
         $allowed_ext = ['jpg','jpeg','png','gif','bmp','webp','pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv','zip','rar','7z'];
         $allowed_mime = ['image/jpeg','image/png','image/gif','image/bmp','image/webp','application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.ms-powerpoint','application/vnd.openxmlformats-officedocument.presentationml.presentation','text/plain','text/csv','application/zip','application/x-rar-compressed','application/x-7z-compressed','application/octet-stream'];
 
@@ -676,7 +680,19 @@ function uploadTicketAttachments($files, $ticket_id) {
         $filename = 'ticket_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $filepath = $upload_dir . $filename;
 
+        $moved = false;
         if (move_uploaded_file($files['tmp_name'][$i], $filepath)) {
+            $moved = true;
+        } elseif (copy($files['tmp_name'][$i], $filepath)) {
+            @unlink($files['tmp_name'][$i]);
+            $moved = true;
+        } else {
+            $err = error_get_last();
+            $errors[] = "File {$files['name'][$i]}: gagal move/copy - " . ($err['message'] ?? 'unknown');
+            error_log("uploadTicketAttachments: gagal upload {$files['name'][$i]} - " . ($err['message'] ?? 'unknown'));
+        }
+
+        if ($moved) {
             $fname = mysqli_real_escape_string($conn, $files['name'][$i]);
             $fpath = mysqli_real_escape_string($conn, 'uploads/tickets/' . $filename);
             $ftype = mysqli_real_escape_string($conn, $files['type'][$i]);
@@ -684,13 +700,22 @@ function uploadTicketAttachments($files, $ticket_id) {
             $tid   = mysqli_real_escape_string($conn, $ticket_id);
             $uid   = mysqli_real_escape_string($conn, getCurrentUserId());
 
-            mysqli_query($conn, "INSERT INTO `TicketAttachment` (id, filename, filepath, filetype, filesize, ticket_id, uploaded_by)
+            $insert_result = mysqli_query($conn, "INSERT INTO `TicketAttachment` (id, filename, filepath, filetype, filesize, ticket_id, uploaded_by)
                                  VALUES (UUID(), '$fname', '$fpath', '$ftype', $fsize, '$tid', '$uid')");
-            $uploaded[] = $fname;
+            if (!$insert_result) {
+                $errors[] = "File {$files['name'][$i]}: DB insert failed - " . mysqli_error($conn);
+                error_log("uploadTicketAttachments: DB insert failed - " . mysqli_error($conn));
+            } else {
+                $uploaded[] = $fname;
+            }
         }
     }
 
-    return ['status' => true, 'message' => count($uploaded) . ' file berhasil diupload', 'files' => $uploaded];
+    $msg = count($uploaded) . ' file berhasil diupload';
+    if (!empty($errors)) {
+        $msg .= '. Errors: ' . implode('; ', $errors);
+    }
+    return ['status' => true, 'message' => $msg, 'files' => $uploaded, 'errors' => $errors];
 }
 
 function getTicketAttachments($ticket_id) {
@@ -772,10 +797,14 @@ function uploadChatAttachments($files, $chat_id) {
     $max_total = 75 * 1024 * 1024;
     $total_size = 0;
     $uploaded = [];
+    $errors = [];
 
     $file_count = count($files['name']);
     for ($i = 0; $i < $file_count; $i++) {
-        if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
+        if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+            $errors[] = "File {$files['name'][$i]}: upload error code {$files['error'][$i]}";
+            continue;
+        }
         $total_size += $files['size'][$i];
     }
 
@@ -805,7 +834,19 @@ function uploadChatAttachments($files, $chat_id) {
         $filename = 'chat_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $filepath = $upload_dir . $filename;
 
+        $moved = false;
         if (move_uploaded_file($files['tmp_name'][$i], $filepath)) {
+            $moved = true;
+        } elseif (copy($files['tmp_name'][$i], $filepath)) {
+            @unlink($files['tmp_name'][$i]);
+            $moved = true;
+        } else {
+            $err = error_get_last();
+            $errors[] = "File {$files['name'][$i]}: gagal move/copy - " . ($err['message'] ?? 'unknown');
+            error_log("uploadChatAttachments: gagal upload {$files['name'][$i]} - " . ($err['message'] ?? 'unknown'));
+        }
+
+        if ($moved) {
             $fname = mysqli_real_escape_string($conn, $files['name'][$i]);
             $fpath = mysqli_real_escape_string($conn, 'uploads/chat/' . $filename);
             $ftype = mysqli_real_escape_string($conn, $files['type'][$i]);
@@ -813,13 +854,22 @@ function uploadChatAttachments($files, $chat_id) {
             $cid   = mysqli_real_escape_string($conn, $chat_id);
             $uid   = mysqli_real_escape_string($conn, getCurrentUserId());
 
-            mysqli_query($conn, "INSERT INTO `ChatAttachment` (id, chat_id, filename, filepath, filetype, filesize, uploaded_by)
+            $insert_result = mysqli_query($conn, "INSERT INTO `ChatAttachment` (id, chat_id, filename, filepath, filetype, filesize, uploaded_by)
                                  VALUES (UUID(), '$cid', '$fname', '$fpath', '$ftype', $fsize, '$uid')");
-            $uploaded[] = $fname;
+            if (!$insert_result) {
+                $errors[] = "File {$files['name'][$i]}: DB insert failed - " . mysqli_error($conn);
+                error_log("uploadChatAttachments: DB insert failed - " . mysqli_error($conn));
+            } else {
+                $uploaded[] = $fname;
+            }
         }
     }
 
-    return ['status' => true, 'message' => count($uploaded) . ' file berhasil diupload', 'files' => $uploaded];
+    $msg = count($uploaded) . ' file berhasil diupload';
+    if (!empty($errors)) {
+        $msg .= '. Errors: ' . implode('; ', $errors);
+    }
+    return ['status' => true, 'message' => $msg, 'files' => $uploaded, 'errors' => $errors];
 }
 
 function getChatAttachments($chat_id) {

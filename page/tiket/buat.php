@@ -14,9 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($result['status']) {
             $ticket_id = $result['ticket_id'] ?? null;
             if ($ticket_id && isset($_FILES['attachments']) && $_FILES['attachments']['error'][0] !== UPLOAD_ERR_NO_FILE) {
-                uploadTicketAttachments($_FILES['attachments'], $ticket_id);
+                $upload_result = uploadTicketAttachments($_FILES['attachments'], $ticket_id);
+                if (!empty($upload_result['errors'])) {
+                    $error = 'Tiket dibuat, tapi ada masalah upload: ' . implode('; ', $upload_result['errors']);
+                }
             }
             setFlash('success', $result['message']);
+            if ($error) {
+                setFlash('error', $error);
+            }
             header('Location: ' . getBaseUrl() . 'page/tiket/buat.php');
             exit;
         } else {
@@ -29,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $categories = getCategories();
 $flash_success = flashMessage('success');
+$flash_error = flashMessage('error');
 include '../../includes/header.php';
 ?>
 <div id="layoutSidenav_content">
@@ -43,6 +50,12 @@ include '../../includes/header.php';
                         <?php if ($flash_success): ?>
                         <script>
                             Swal.fire({ icon: 'success', title: 'Berhasil', text: '<?= htmlspecialchars($flash_success) ?>', timer: 3000, showConfirmButton: false });
+                        </script>
+                        <?php endif; ?>
+
+                        <?php if ($flash_error): ?>
+                        <script>
+                            Swal.fire({ icon: 'warning', title: 'Peringatan', text: '<?= htmlspecialchars($flash_error) ?>', timer: 5000 });
                         </script>
                         <?php endif; ?>
 
