@@ -48,7 +48,8 @@ it-helpdesk-php-native-master/
 │   │   └── ajax_messages.php  # AJAX endpoint chat polling
 │   ├── dashboard/
 │   │   ├── index.php          # STAFF: Dashboard + leaderboard
-│   │   └── manager.php        # MANAGER: Charts + leaderboard
+│   │   ├── manager.php        # MANAGER: Charts + leaderboard + detail staff
+│   │   └── user.php           # USER: Dashboard + statistik tiket
 │   ├── profil/index.php       # Semua role: profil & ubah password
 │   ├── tiket/
 │   │   ├── buat.php           # USER: Buat tiket baru
@@ -214,9 +215,9 @@ it-helpdesk-php-native-master/
                              │ -> /dashboard/manager │  └──────────┘
                              │ STAFF    │
                              │ -> /dashboard/
-                             │ USER     │
-                             │ -> /tiket/buat.php
-                             └──────────┘
+                              │ USER     │
+                              │ -> /dashboard/user.php
+                              └──────────┘
 ```
 
 ### Struktur Role & Akses
@@ -227,6 +228,7 @@ it-helpdesk-php-native-master/
 ├─────────────────────┬─────────┬─────────┬──────────────────┤
 │ Halaman             │ USER    │ STAFF   │ MANAGER          │
 ├─────────────────────┼─────────┼─────────┼──────────────────┤
+│ Dashboard User      │   ✓     │         │                  │
 │ Buat Tiket          │   ✓     │         │                  │
 │ Tiket Antrian (User)│   ✓     │         │                  │
 │ Tiket Selesai (User)│   ✓     │         │                  │
@@ -365,6 +367,7 @@ http://localhost/it-helpdesk-php-native-master/schema/seed.php
 ## Fitur
 
 ### USER (Pengguna)
+- Dashboard dengan statistik tiket (total, antrian, selesai)
 - Buat tiket baru dengan deskripsi dan upload bukti
 - Melihat tiket dalam antrian (OPEN, IN_PROGRESS, PENDING)
 - Melihat tiket selesai (RESOLVED, CLOSED)
@@ -387,4 +390,77 @@ http://localhost/it-helpdesk-php-native-master/schema/seed.php
 - Validasi poin tiket selesai
 - Kelola akun user (CRUD + aktifkan/nonaktifkan)
 - Kelola kategori tiket (CRUD)
-- Melihat dan mengambil tiket baru
+- Kelola divisi (CRUD + prioritas)
+- Melihat tiket baru (tanpa bisa klaim)
+- Detail peringkat per staff + riwayat tiket selesai
+- Pengaturan WhatsApp notification (gateway, template)
+
+## Troubleshooting
+
+### Upload Gambar/Lampiran Tidak Tersimpan
+
+Jika upload file tidak tersimpan atau error, periksa hal berikut:
+
+1. **Permission folder `uploads/`**
+   - Pastikan folder `uploads/tickets/` dan `uploads/chat/` writable
+   - Cek: `is_writable('uploads/tickets/')` harus `true`
+
+2. **Konfigurasi PHP (`php.ini`)**
+   ```ini
+   file_uploads = On
+   upload_max_filesize = 2G
+   post_max_size = 2G
+   ```
+
+3. **Ekstensi cURL** (untuk WA notification)
+   - Jika `curl_init()` undefined, uncomment `extension=curl` di `php.ini`
+   - Aplikasi tetap berfungsi tanpa cURL (WA notification di-skip otomatis)
+
+4. **Error log**
+   - Cek `C:\laragon\tmp\php_errors.log` untuk detail error
+   - Fungsi upload sudah mencatat error ke log jika gagal
+
+5. **Fallback upload**
+   - Jika `move_uploaded_file()` gagal (umum di Windows), aplikasi otomatis fallback ke `copy()`
+
+### Koneksi Database Gagal
+
+Jika muncul error `Access denied for user 'root'@'localhost'`:
+
+1. Buka `config/config.php`
+2. Sesuaikan password MySQL:
+   ```php
+   $password = '';        // Laragon default (kosong)
+   $password = 'root';    // XAMPP default
+   ```
+
+### Reset Database
+
+Jika perlu reset database dari awal:
+
+```sql
+DROP DATABASE IF EXISTS helpdesk;
+CREATE DATABASE helpdesk CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Lalu import ulang `schema/helpdesk.sql` via phpMyAdmin atau CLI:
+```bash
+mysql -u root helpdesk < schema/helpdesk.sql
+```
+
+## Keamanan
+
+- Password di-hash dengan `password_hash()` (bcrypt)
+- Session-based authentication dengan token random
+- Rate limiting pada login
+- `.htaccess` di semua folder `uploads/` untuk mencegah eksekusi PHP
+- Prepared statements / `mysqli_real_escape_string()` pada semua query
+- Role-based access control (USER, STAFF, MANAGER)
+
+## Browser Cache
+
+Aplikasi menggunakan cache-busting pada CSS (`?v=<?= time() ?>`) sehingga perubahan style langsung terlihat tanpa perlu hard refresh.
+
+## Lisensi
+
+MIT License - bebas digunakan dan dimodifikasi.
