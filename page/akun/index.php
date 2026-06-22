@@ -106,7 +106,7 @@ include '../../includes/header.php';
                                 <label for="role" class="form-label">Pilih Role :</label>
                                 <select class="form-select" name="role" id="role" required>
                                     <option value="USER">User</option>
-                                    <option value="STAFF">Support</option>
+                                    <option value="STAFF">IT Support</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -263,6 +263,53 @@ include '../../includes/header.php';
             });
         });
     });
+    
+    // === Auto-lock division to IT Support when role = STAFF ===
+    var DIV_IT_SUPPORT_ID = '3cb297f6-6626-11f1-b204-001518018131';
+
+    function handleRoleChange(roleSelect, divSelect) {
+        if (!roleSelect || !divSelect) return;
+        if (roleSelect.value === 'STAFF') {
+            // Auto-select IT Support division
+            Array.from(divSelect.options).forEach(function(opt) {
+                if (opt.value === DIV_IT_SUPPORT_ID) opt.selected = true;
+            });
+            divSelect.disabled = true;
+            divSelect.style.opacity = '0.6';
+            divSelect.required = false;
+        } else {
+            divSelect.disabled = false;
+            divSelect.style.opacity = '1';
+            divSelect.required = true;
+        }
+    }
+
+    // Form tambah user
+    var roleSelect = document.getElementById('role');
+    var divSelect = document.getElementById('division_id');
+    if (roleSelect && divSelect) {
+        roleSelect.addEventListener('change', function() {
+            handleRoleChange(roleSelect, divSelect);
+        });
+        // Trigger on load
+        handleRoleChange(roleSelect, divSelect);
+    }
+
+    // Form edit user (modals)
+    document.querySelectorAll('[id^="modal-"]').forEach(function(modal) {
+        var editRole = modal.querySelector('select[name="edit_role"]');
+        var editDiv = modal.querySelector('select[name="edit_division_id"]');
+        if (editRole && editDiv) {
+            editRole.addEventListener('change', function() {
+                handleRoleChange(editRole, editDiv);
+            });
+            // Trigger on modal show
+            modal.addEventListener('shown.bs.modal', function() {
+                handleRoleChange(editRole, editDiv);
+            });
+        }
+    });
+
     </script>
 
     <?php include '../../includes/footer.php'; ?>

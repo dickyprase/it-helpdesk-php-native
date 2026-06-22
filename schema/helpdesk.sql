@@ -242,13 +242,25 @@ INSERT IGNORE INTO `Division` (`id`, `name`, `priority_level`) VALUES
 -- DATA AWAL: User (password ter-hash dengan bcrypt)
 -- ============================================================
 -- MANAGER:  admin@helpdesk.local / admin123 (divisi: IT Infrastructure)
--- STAFF:    staff@helpdesk.local / staff123 (divisi: IT Support)
--- USER:     user@helpdesk.local  / user123 (divisi: General Affairs)
+-- STAFF:    dani@helpdesk.local    / staff123 (divisi: IT Support)
+-- STAFF:    andre@helpdesk.local   / staff123 (divisi: IT Support)
+-- STAFF:    zainal@helpdesk.local  / staff123 (divisi: IT Support)
+-- STAFF:    rizal@helpdesk.local   / staff123 (divisi: IT Support)
+-- STAFF:    angga@helpdesk.local   / staff123 (divisi: IT Support)
+-- USER:     budi@helpdesk.local    / user123 (divisi: General Affairs)
+-- USER:     siti@helpdesk.local    / user123 (divisi: General Affairs)
+-- USER:     joko@helpdesk.local    / user123 (divisi: General Affairs)
 
-INSERT IGNORE INTO `User` (`id`, `name`, `email`, `password_hash`, `role`, `division_id`) VALUES
-(UUID(), 'Super Admin',      'admin@helpdesk.local', '$2y$10$JHdqr63F3P/Ze7xRbfGwe.uPxLpNxwHLBDa6DDRRmBrV2dWuUMpFG', 'MANAGER', (SELECT id FROM `Division` WHERE name = 'IT Infrastructure' LIMIT 1)),
-(UUID(), 'IT Support Staff', 'staff@helpdesk.local', '$2y$10$pF7gBrCs3svz7a17IScEpOAMG0rIpPX2pTJDLPXwozddPFZywBrYe', 'STAFF',   (SELECT id FROM `Division` WHERE name = 'IT Support' LIMIT 1)),
-(UUID(), 'User Demo',        'user@helpdesk.local',  '$2y$10$/6JJHFlthFT4I8Jrii3lDuxhvucWxcMBJ6D2yclEMJLnQlzqCtUke', 'USER',    (SELECT id FROM `Division` WHERE name = 'General Affairs' LIMIT 1));
+INSERT IGNORE INTO `User` (`id`, `name`, `email`, `phone`, `password_hash`, `role`, `division_id`) VALUES
+(UUID(), 'Super Admin',    'admin@helpdesk.local', '081111111111', '$2y$10$JHdqr63F3P/Ze7xRbfGwe.uPxLpNxwHLBDa6DDRRmBrV2dWuUMpFG', 'MANAGER', (SELECT id FROM `Division` WHERE name = 'IT Infrastructure' LIMIT 1)),
+(UUID(), 'Dani',           'dani@helpdesk.local',   '081200011001', '$2y$10$yA8r8jRNmIUHi.VwvBcuMuIaIG7wSRBVjo3EPRtFLYOZOrTYV7Du6', 'STAFF',   (SELECT id FROM `Division` WHERE name = 'IT Support' LIMIT 1)),
+(UUID(), 'Andre',          'andre@helpdesk.local',  '081200011002', '$2y$10$yA8r8jRNmIUHi.VwvBcuMuIaIG7wSRBVjo3EPRtFLYOZOrTYV7Du6', 'STAFF',   (SELECT id FROM `Division` WHERE name = 'IT Support' LIMIT 1)),
+(UUID(), 'Zainal',         'zainal@helpdesk.local', '081200011003', '$2y$10$yA8r8jRNmIUHi.VwvBcuMuIaIG7wSRBVjo3EPRtFLYOZOrTYV7Du6', 'STAFF',   (SELECT id FROM `Division` WHERE name = 'IT Support' LIMIT 1)),
+(UUID(), 'Rizal',          'rizal@helpdesk.local',  '081200011004', '$2y$10$yA8r8jRNmIUHi.VwvBcuMuIaIG7wSRBVjo3EPRtFLYOZOrTYV7Du6', 'STAFF',   (SELECT id FROM `Division` WHERE name = 'IT Support' LIMIT 1)),
+(UUID(), 'Angga',          'angga@helpdesk.local',  '081200011005', '$2y$10$yA8r8jRNmIUHi.VwvBcuMuIaIG7wSRBVjo3EPRtFLYOZOrTYV7Du6', 'STAFF',   (SELECT id FROM `Division` WHERE name = 'IT Support' LIMIT 1)),
+(UUID(), 'Budi Santoso',   'budi@helpdesk.local',   '081200011101', '$2y$10$6oDreiuUQtiYOZhQT9i6keXXeb/LqLNOhpmVoT.rVQ2rhlGsv/U8y', 'USER',    (SELECT id FROM `Division` WHERE name = 'General Affairs' LIMIT 1)),
+(UUID(), 'Siti Rahayu',    'siti@helpdesk.local',   '081200011102', '$2y$10$6oDreiuUQtiYOZhQT9i6keXXeb/LqLNOhpmVoT.rVQ2rhlGsv/U8y', 'USER',    (SELECT id FROM `Division` WHERE name = 'General Affairs' LIMIT 1)),
+(UUID(), 'Joko Widodo',    'joko@helpdesk.local',   '081200011103', '$2y$10$6oDreiuUQtiYOZhQT9i6keXXeb/LqLNOhpmVoT.rVQ2rhlGsv/U8y', 'USER',    (SELECT id FROM `Division` WHERE name = 'General Affairs' LIMIT 1));
 
 -- ============================================================
 -- DATA AWAL: WA Setting
@@ -274,6 +286,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- SELESAI!
 -- Setelah import SQL ini, data sudah langsung tersedia:
 --   MANAGER : admin@helpdesk.local / admin123
---   STAFF   : staff@helpdesk.local / staff123
---   USER    : user@helpdesk.local  / user123
+--   STAFF   : dani@helpdesk.local / staff123
+--   USER    : budi@helpdesk.local / user123
 -- ============================================================

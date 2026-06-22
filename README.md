@@ -14,12 +14,12 @@ Aplikasi helpdesk IT berbasis PHP native dengan arsitektur MVC sederhana, menggu
 | Charts | Chart.js 2.8.0 |
 | Tables | Simple-DataTables 7.1.2 |
 | Alerts | SweetAlert2 v11 |
-| Server | Laragon / Apache |
+| Server | Laragon / Apache / Nginx |
 
 ## Struktur Folder
 
 ```
-it-helpdesk-php-native-master/
+it-helpdesk-php-native/
 ├── assets/
 │   └── demo/                  # Chart.js demo scripts
 ├── config/
@@ -34,7 +34,9 @@ it-helpdesk-php-native-master/
 │   ├── scripts.js             # Sidebar toggle logic
 │   └── datatables-simple-demo.js  # DataTable init
 ├── uploads/
-│   └── evidence/              # Bukti kendala tiket (uploaded files)
+│   ├── evidence/              # Bukti kendala tiket (uploaded files)
+│   ├── tickets/               # Lampiran tiket
+│   └── chat/                  # Lampiran chat
 ├── login/
 │   └── index.php              # Halaman login
 ├── logout/
@@ -42,8 +44,9 @@ it-helpdesk-php-native-master/
 ├── page/
 │   ├── akun/index.php         # MANAGER: CRUD akun user
 │   ├── kategori/index.php     # MANAGER: CRUD kategori
+│   ├── divisi/index.php       # MANAGER: CRUD divisi
 │   ├── chat/
-│   │   ├── index.php          # STAFF: Chat + resolve tiket
+│   │   ├── index.php          # STAFF/MANAGER: Chat + resolve tiket
 │   │   ├── user.php           # USER: Chat view
 │   │   └── ajax_messages.php  # AJAX endpoint chat polling
 │   ├── dashboard/
@@ -53,12 +56,15 @@ it-helpdesk-php-native-master/
 │   ├── profil/index.php       # Semua role: profil & ubah password
 │   ├── tiket/
 │   │   ├── buat.php           # USER: Buat tiket baru
-│   │   ├── baru.php           # STAFF: Tiket OPEN (ambil tiket)
+│   │   ├── open.php           # STAFF: Tiket OPEN belum ditugaskan (klaim)
+│   │   ├── baru.php           # STAFF/MANAGER: Semua tiket + filter adaptive
 │   │   ├── antrian.php        # USER: Tiket dalam proses
 │   │   ├── proses.php         # STAFF: Tiket ditangani
 │   │   ├── selesai.php        # USER: Tiket selesai
 │   │   └── riwayat.php        # STAFF: Riwayat tiket selesai
-│   └── validasi/index.php     # MANAGER: Validasi poin tiket
+│   ├── validasi/index.php     # MANAGER: Validasi poin tiket
+│   ├── notifikasi/            # Notifikasi + mark read
+│   └── wa-settings/           # Pengaturan WhatsApp gateway
 ├── schema/
 │   ├── helpdesk.sql           # Database schema + seed data
 │   └── seed.php               # Seed/update data awal
@@ -97,9 +103,16 @@ it-helpdesk-php-native-master/
 │                                                                 │
 │  ┌──────────┐    ┌──────────────┐    ┌──────────────┐          │
 │  │  Login   │───>│  Dashboard   │───>│  Tiket Baru  │          │
-│  │          │    │  (Statistik  │    │  (OPEN)      │          │
-│  │          │    │  + Leaderboard)   │  Klaim tiket  │          │
+│  │          │    │  (Statistik  │    │  (OPEN,       │          │
+│  │          │    │  + Leaderboard)   │  unassigned)  │          │
 │  └──────────┘    └──────────────┘    └──────┬───────┘          │
+│                                             │                   │
+│                                    ┌────────▼────────┐          │
+│                                    │  Semua Tiket   │          │
+│                                    │  (+ filter:    │          │
+│                                    │  status, user, │          │
+│                                    │  staff, tanggal)│         │
+│                                    └────────┬────────┘          │
 │                                             │                   │
 │                                    ┌────────▼────────┐          │
 │                                    │  Proses Tiket   │          │
@@ -134,12 +147,18 @@ it-helpdesk-php-native-master/
 │  └──────────┘    └──────────────┘    └──────────────┘          │
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────┐      │
+│  │  Menu Tiket (Semua tiket + filter adaptive)          │      │
+│  │  Filter: status, nama user, staff IT, rentang tanggal │      │
+│  └──────────────────────────────────────────────────────┘      │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────┐      │
 │  │  Pengaturan                                           │      │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐ │      │
 │  │  │  Akun       │  │  Kategori   │  │  Validasi    │ │      │
 │  │  │  (CRUD user │  │  (CRUD      │  │  Poin        │ │      │
 │  │  │  + role)    │  │  kategori)  │  │  (Setujui    │ │      │
-│  │  │             │  │             │  │  poin tiket) │ │      │
+│  │  │  + auto     │  │             │  │  poin tiket) │ │      │
+│  │  │  divisi)    │  │             │  │              │ │      │
 │  │  └─────────────┘  └─────────────┘  └──────────────┘ │      │
 │  └──────────────────────────────────────────────────────┘      │
 └─────────────────────────────────────────────────────────────────┘
@@ -190,35 +209,8 @@ it-helpdesk-php-native-master/
 | `OPEN` | Terbuka | Tiket baru, menunggu staff mengambil | Hijau |
 | `IN_PROGRESS` | Diproses | Sedang ditangani staff | Biru |
 | `PENDING` | Tertunda | Ditunda oleh staff (dengan alasan) | Kuning |
-| `TRANSFERRING` | Dialihkan | Dialihkan ke staff/divisi lain | Kuning |
 | `RESOLVED` | Selesai | Diselesaikan oleh staff, menunggu validasi | Cyan |
 | `CLOSED` | Ditutup | Divalidasi oleh manager, poin diberikan | Abu-abu |
-
-### Alur Login & Autentikasi
-
-```
-┌──────────┐     ┌──────────────┐     ┌──────────────────────┐
-│  Input   │────>│  Cek Email   │────>│  Cek Password        │
-│  Email + │     │  di Database │     │  (password_verify)   │
-│  Password│     │              │     │                      │
-└──────────┘     └──────────────┘     └──────────┬───────────┘
-                                                  │
-                                    ┌─────────────┼─────────────┐
-                                    │             │             │
-                                 Berhasil      Gagal         Rate Limit
-                                    │             │             │
-                                    ▼             ▼             ▼
-                             ┌──────────┐  ┌──────────┐  ┌──────────┐
-                             │ Redirect │  │  Error   │  │  Error   │
-                             │ by Role: │  │  Message │  │  Too Many│
-                             │ MANAGER  │  │          │  │  Attempts│
-                             │ -> /dashboard/manager │  └──────────┘
-                             │ STAFF    │
-                             │ -> /dashboard/
-                              │ USER     │
-                              │ -> /dashboard/user.php
-                              └──────────┘
-```
 
 ### Struktur Role & Akses
 
@@ -235,7 +227,8 @@ it-helpdesk-php-native-master/
 │ Chat (User)         │   ✓     │         │                  │
 │ Profil              │   ✓     │   ✓     │      ✓           │
 │ Dashboard           │         │   ✓     │                  │
-│ Tiket Baru (Staff)  │         │   ✓     │      ✓           │
+│ Tiket Baru (Klaim)  │         │   ✓     │      ✓           │
+│ Semua Tiket+Filter  │         │   ✓     │      ✓           │
 │ Proses Tiket        │         │   ✓     │                  │
 │ Riwayat Tiket       │         │   ✓     │                  │
 │ Chat (Staff)        │         │   ✓     │                  │
@@ -243,6 +236,8 @@ it-helpdesk-php-native-master/
 │ Validasi Poin       │         │         │      ✓           │
 │ Kelola Akun         │         │         │      ✓           │
 │ Kelola Kategori     │         │         │      ✓           │
+│ Kelola Divisi       │         │         │      ✓           │
+│ Pengaturan WA       │         │         │      ✓           │
 └─────────────────────┴─────────┴─────────┴──────────────────┘
 ```
 
@@ -254,9 +249,11 @@ it-helpdesk-php-native-master/
 │             │                    │             │
 │  Kirim      │──── Chat Table ───>│  Terima     │
 │  Pesan      │    (Database)      │  Pesan      │
+│  + Gambar   │                    │             │
 │             │                    │             │
 │  Terima     │<─── AJAX Poll ────│  Kirim      │
 │  Pesan      │    (setiap 3 detik)│  Pesan      │
+│  + Gambar   │    + Inline image  │  + Gambar   │
 │             │                    │             │
 │  [Kembali]  │                    │  [Selesai]  │
 │             │                    │  [Kesulitan]│
@@ -286,6 +283,7 @@ Manager Validasi
 Dashboard Staff/Manager
   - Tabel Peringkat (ranking by poin)
   - Filter: Bulanan / Tahunan
+  - Detail per staff (tiket, kategori, kesulitan)
 ```
 
 ## Database Schema
@@ -313,38 +311,63 @@ Notification_Template
 - `Chat.ticket_id` → `Ticket.id`
 - `Chat.sender_id` → `User.id`
 - `TicketAttachment.ticket_id` → `Ticket.id`
+- `ChatAttachment.chat_id` → `Chat.id`
 - `LeaderboardLog.staff_id` → `User.id`
 - `LeaderboardLog.ticket_id` → `Ticket.id`
 - `Session.user_id` → `User.id`
 
 ## Akun Default
 
-| Role | Email | Password |
+Setelah import `schema/helpdesk.sql`, akun berikut tersedia:
+
+### Manager
+
+| Nama | Email | Password |
 |------|-------|----------|
-| MANAGER (Super Admin) | admin@helpdesk.local | admin123 |
-| STAFF (IT Support) | staff@helpdesk.local | staff123 |
-| USER (Demo) | user@helpdesk.local | user123 |
+| Super Admin | admin@helpdesk.local | admin123 |
+
+### Staff IT (divisi: IT Support)
+
+| Nama | Email | Password |
+|------|-------|----------|
+| Dani | dani@helpdesk.local | staff123 |
+| Andre | andre@helpdesk.local | staff123 |
+| Zainal | zainal@helpdesk.local | staff123 |
+| Rizal | rizal@helpdesk.local | staff123 |
+| Angga | angga@helpdesk.local | staff123 |
+
+### User (divisi: General Affairs)
+
+| Nama | Email | Password |
+|------|-------|----------|
+| Budi Santoso | budi@helpdesk.local | user123 |
+| Siti Rahayu | siti@helpdesk.local | user123 |
+| Joko Widodo | joko@helpdesk.local | user123 |
 
 ## Instalasi
 
 ### Prerequisites
 - PHP 8.1+
 - MySQL 5.7+ / MariaDB 10.4+
-- Laragon / XAMPP / Apache
+- Nginx / Apache / Laragon / XAMPP
 
 ### Langkah-langkah
 
 1. **Clone/Download** project ke folder web server:
    ```
-   C:\laragon\www\it-helpdesk-php-native-master\
+   /var/www/html/it-helpdesk-php-native/
    ```
 
-2. **Buat database** `helpdesk` di phpMyAdmin:
+2. **Buat database** `helpdesk` di phpMyAdmin atau CLI:
    ```sql
    CREATE DATABASE helpdesk CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
 
-3. **Import schema**: Buka phpMyAdmin → pilih database `helpdesk` → Import → pilih `schema/helpdesk.sql`
+3. **Import schema**: 
+   ```bash
+   mysql -u root helpdesk < schema/helpdesk.sql
+   ```
+   Atau via phpMyAdmin → Import → pilih `schema/helpdesk.sql`
 
 4. **Konfigurasi database** di `config/config.php`:
    ```php
@@ -354,14 +377,14 @@ Notification_Template
    $database = 'helpdesk';
    ```
 
-5. **Buka aplikasi**: `http://localhost/it-helpdesk-php-native-master/login/`
+5. **Buka aplikasi**: `http://localhost/it-helpdesk-php-native/login/`
 
 6. **Login** dengan akun default di atas
 
 ### Update Data Awal (Opsional)
 Jika ingin memperbarui password akun default:
 ```
-http://localhost/it-helpdesk-php-native-master/schema/seed.php
+http://localhost/it-helpdesk-php-native/schema/seed.php
 ```
 
 ## Fitur
@@ -371,64 +394,81 @@ http://localhost/it-helpdesk-php-native-master/schema/seed.php
 - Buat tiket baru dengan deskripsi dan upload bukti
 - Melihat tiket dalam antrian (OPEN, IN_PROGRESS, PENDING)
 - Melihat tiket selesai (RESOLVED, CLOSED)
-- Chat dengan staff support
+- Chat dengan staff support + upload gambar inline
 - Melihat riwayat chat
 - Ubah profil dan password
 
 ### STAFF (IT Support)
 - Dashboard dengan statistik tiket dan leaderboard
-- Melihat dan mengambil tiket baru (OPEN)
+- **Tiket Baru**: Melihat dan mengambil tiket OPEN yang belum ditugaskan
+- **Semua Tiket**: View semua tiket dengan filter adaptive (status, user, staff, tanggal)
 - Memproses tiket (IN_PROGRESS)
-- Chat dengan user
+- Chat dengan user + upload gambar inline
 - Menandai tiket selesai (RESOLVED)
 - Menunda tiket (PENDING) dengan alasan
-- Melihat riwayat tiket
+- Melihat riwayat tiket selesai
 
 ### MANAGER (Super Admin)
 - Dashboard dengan chart (keluhan user, progress penyelesaian)
-- Leaderboard ranking staff
+- Leaderboard ranking staff + detail per staff
+- **Menu Tiket**: Semua tiket dengan filter adaptive (status, nama user, staff IT, rentang tanggal)
 - Validasi poin tiket selesai
-- Kelola akun user (CRUD + aktifkan/nonaktifkan)
+- Kelola akun user (CRUD + aktifkan/nonaktifkan + auto-assign divisi IT Support)
 - Kelola kategori tiket (CRUD)
 - Kelola divisi (CRUD + prioritas)
-- Melihat tiket baru (tanpa bisa klaim)
-- Detail peringkat per staff + riwayat tiket selesai
 - Pengaturan WhatsApp notification (gateway, template)
+
+## Changelog
+
+### v2.0 (Juni 2026)
+- **Menu Tiket Baru**: Halaman khusus tiket OPEN belum ditugaskan untuk staff
+- **Semua Tiket**: Halaman tiket general dengan filter adaptive (status, user, staff, tanggal)
+- **Chat**: Upload gambar langsung tampil inline (bukan link), support attachment-only tanpa teks
+- **Akun**: Role "Support" → "IT Support", auto-lock divisi IT Support saat pilih role IT Support
+- **Kolom "Nama"**: Diganti jadi "Nama User" di semua tabel tiket untuk klaritas
+- **Sidebar Staff**: "Menu Support" → "Menu IT Support", sub-menu "Baru" → "Semua Tiket"
+- **Data dummy**: 5 staff IT (Dani, Andre, Zainal, Rizal, Angga) + 3 user (Budi, Siti, Joko)
+- **Schema**: helpdesk.sql updated dengan akun baru, hapus staff demo & user demo
+- **Upload**: Fix nginx client_max_body_size, fix UUID chat_id untuk attachment upload
+- **Tabel tiket**: Tambah kolom "Staff IT" untuk menampilkan siapa yang menangani
+
+### v1.0
+- Aplikasi helpdesk IT dengan 3 role (USER, STAFF, MANAGER)
+- CRUD tiket, chat real-time (AJAX polling), leaderboard & poin
+- Dashboard dengan chart untuk manager
+- WhatsApp notification gateway
+- Upload bukti tiket + lampiran chat
 
 ## Troubleshooting
 
 ### Upload Gambar/Lampiran Tidak Tersimpan
 
-Jika upload file tidak tersimpan atau error, periksa hal berikut:
-
 1. **Permission folder `uploads/`**
-   - Pastikan folder `uploads/tickets/` dan `uploads/chat/` writable
-   - Cek: `is_writable('uploads/tickets/')` harus `true`
+   - Pastikan folder `uploads/tickets/` dan `uploads/chat/` writable (www-data / nginx)
+   - `chown -R www-data:www-data uploads/`
 
-2. **Konfigurasi PHP (`php.ini`)**
+2. **nginx: 413 Request Entity Too Large**
+   - Tambahkan `client_max_body_size 75M;` di nginx.conf / sites-enabled
+   - Reload nginx: `systemctl reload nginx`
+
+3. **PHP upload limit**
    ```ini
    file_uploads = On
-   upload_max_filesize = 2G
-   post_max_size = 2G
+   upload_max_filesize = 50M
+   post_max_size = 80M
    ```
 
-3. **Ekstensi cURL** (untuk WA notification)
-   - Jika `curl_init()` undefined, uncomment `extension=curl` di `php.ini`
-   - Aplikasi tetap berfungsi tanpa cURL (WA notification di-skip otomatis)
+4. **Fallback upload**
+   - Jika `move_uploaded_file()` gagal, aplikasi otomatis fallback ke `copy()`
 
-4. **Error log**
-   - Cek `C:\laragon\tmp\php_errors.log` untuk detail error
-   - Fungsi upload sudah mencatat error ke log jika gagal
-
-5. **Fallback upload**
-   - Jika `move_uploaded_file()` gagal (umum di Windows), aplikasi otomatis fallback ke `copy()`
+### Chat Attachment Tidak Masuk DB
+- Periksa `sendMessage()` return `chat_id` dengan benar (UUID primary key, bukan auto_increment)
+- Query attachment menggunakan `SELECT id FROM Chat WHERE ... ORDER BY created_at DESC LIMIT 1`
 
 ### Koneksi Database Gagal
 
-Jika muncul error `Access denied for user 'root'@'localhost'`:
-
 1. Buka `config/config.php`
-2. Sesuaikan password MySQL:
+2. Sesuaikan kredensial MySQL:
    ```php
    $password = '';        // Laragon default (kosong)
    $password = 'root';    // XAMPP default
@@ -436,14 +476,12 @@ Jika muncul error `Access denied for user 'root'@'localhost'`:
 
 ### Reset Database
 
-Jika perlu reset database dari awal:
-
 ```sql
 DROP DATABASE IF EXISTS helpdesk;
 CREATE DATABASE helpdesk CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Lalu import ulang `schema/helpdesk.sql` via phpMyAdmin atau CLI:
+Lalu import ulang:
 ```bash
 mysql -u root helpdesk < schema/helpdesk.sql
 ```
@@ -454,8 +492,9 @@ mysql -u root helpdesk < schema/helpdesk.sql
 - Session-based authentication dengan token random
 - Rate limiting pada login
 - `.htaccess` di semua folder `uploads/` untuk mencegah eksekusi PHP
-- Prepared statements / `mysqli_real_escape_string()` pada semua query
+- `mysqli_real_escape_string()` pada semua query
 - Role-based access control (USER, STAFF, MANAGER)
+- Server-side auto-assign divisi IT Support untuk role STAFF
 
 ## Browser Cache
 

@@ -100,7 +100,7 @@ include '../../includes/header.php';
                             <tr>
                                 <th class="text-center">No</th>
                                 <th>No Tiket</th>
-                                <th>Nama</th>
+                                <th>Nama User</th>
                                 <th>Tanggal</th>
                                 <th>Deskripsi Kendala</th>
                                 <th>Kategori</th>

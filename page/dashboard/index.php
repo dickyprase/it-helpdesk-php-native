@@ -3,9 +3,10 @@ require_once '../../config/function.php';
 requireRole('STAFF');
 
 $staff_id = getCurrentUserId();
-$count_new = count(getTickets("t.status = 'OPEN' AND t.staff_id IS NULL"));
+$count_open = count(getTickets("t.status = 'OPEN' AND t.staff_id IS NULL"));
 $count_queue = count(getTickets("t.staff_id = '$staff_id' AND t.status IN ('IN_PROGRESS','PENDING')"));
 $count_done = count(getTickets("t.staff_id = '$staff_id' AND t.status IN ('RESOLVED','CLOSED')"));
+$count_all = $count_open + $count_queue + $count_done;
 
 $leaderboard = getLeaderboard();
 $my_points = 0;
@@ -31,10 +32,10 @@ include '../../includes/header.php';
                                 <div class="card-body">Tiket Baru</div>
                             </div>
                             <div class="col-4 text-end">
-                                <div class="card-body" style="font-size: 30px; color: #8c57ff;"><?= $count_new ?></div>
+                                <div class="card-body" style="font-size: 30px; color: #8c57ff;"><?= $count_open ?></div>
                             </div>
                         </div>
-                        <a class="btn" href="<?= getBaseUrl() ?>page/tiket/baru.php" style="background-color: #8c57ff; color: white; text-decoration: none;">Selengkapnya</a>
+                        <a class="btn" href="<?= getBaseUrl() ?>page/tiket/open.php" style="background-color: #8c57ff; color: white; text-decoration: none;">Selengkapnya</a>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">

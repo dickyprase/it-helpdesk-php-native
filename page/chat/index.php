@@ -9,16 +9,24 @@ $msg_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['send_message'])) {
         $message = trim($_POST['message'] ?? '');
-        if ($message) {
-            $r = sendMessage($ticket_id, $message);
+        $has_attachment = isset($_FILES['attachments']) && $_FILES['attachments']['error'][0] !== UPLOAD_ERR_NO_FILE;
+        
+        // Allow send if there's text OR attachment (don't require both)
+        if ($message || $has_attachment) {
+            $r = sendMessage($ticket_id, $message ?: '(file attachment)');
             if ($r['status']) {
                 $chat_id = $r['chat_id'] ?? null;
-                if ($chat_id && isset($_FILES['attachments']) && $_FILES['attachments']['error'][0] !== UPLOAD_ERR_NO_FILE) {
-                    uploadChatAttachments($_FILES['attachments'], $chat_id);
+                if ($chat_id && $has_attachment) {
+                    $att_result = uploadChatAttachments($_FILES['attachments'], $chat_id);
+                    if (!$att_result['status']) {
+                        $msg_error = $att_result['message'];
+                    }
                 }
             } else {
                 $msg_error = $r['message'];
             }
+        } elseif (!$message && !$has_attachment) {
+            $msg_error = 'Tulis pesan atau lampirkan file';
         }
     }
     if (isset($_POST['resolve_ticket'])) {
@@ -69,7 +77,7 @@ include '../../includes/header.php';
                             <thead>
                                 <tr class="text-center align-middle">
                                     <th>No Tiket</th>
-                                    <th>Nama</th>
+                                    <th>Nama User</th>
                                     <th>Kategori</th>
                                     <th>Divisi</th>
                                     <th>Prioritas</th>
@@ -143,11 +151,20 @@ include '../../includes/header.php';
                                                         <?= nl2br(htmlspecialchars($msg['message'] ?? '')) ?>
                                                     </div>
                                                     <?php if (!empty($msg['attachments'])): ?>
-                                                    <div class="mt-1">
-                                                        <?php foreach ($msg['attachments'] as $att): ?>
-                                                            <a href="<?= getBaseUrl() . htmlspecialchars($att['filepath']) ?>" target="_blank" class="badge bg-secondary text-decoration-none me-1" title="<?= htmlspecialchars($att['filename']) ?>">
-                                                                <i class="fas fa-paperclip"></i> <?= htmlspecialchars(potongTeks($att['filename'], 20)) ?>
-                                                            </a>
+                                                    <div class="mt-1 d-flex flex-wrap gap-2">
+                                                        <?php foreach ($msg['attachments'] as $att):
+                                                            $att_ext = strtolower(pathinfo($att['filepath'], PATHINFO_EXTENSION));
+                                                            $is_img = in_array($att_ext, ['jpg','jpeg','png','gif','bmp','webp']);
+                                                        ?>
+                                                            <?php if ($is_img): ?>
+                                                                <a href="<?= getBaseUrl() . htmlspecialchars($att['filepath']) ?>" target="_blank">
+                                                                    <img src="<?= getBaseUrl() . htmlspecialchars($att['filepath']) ?>" alt="<?= htmlspecialchars($att['filename']) ?>" class="rounded" style="max-width: 200px; max-height: 200px; object-fit: cover; cursor: pointer;">
+                                                                </a>
+                                                            <?php else: ?>
+                                                                <a href="<?= getBaseUrl() . htmlspecialchars($att['filepath']) ?>" target="_blank" class="badge bg-secondary text-decoration-none me-1" title="<?= htmlspecialchars($att['filename']) ?>">
+                                                                    <i class="fas fa-paperclip"></i> <?= htmlspecialchars(potongTeks($att['filename'], 20)) ?>
+                                                                </a>
+                                                            <?php endif; ?>
                                                         <?php endforeach; ?>
                                                     </div>
                                                     <?php endif; ?>
@@ -164,7 +181,7 @@ include '../../includes/header.php';
                                 <div class="border-top pt-3 mt-2">
                                     <form method="POST" enctype="multipart/form-data" class="d-flex flex-column gap-2">
                                         <div class="d-flex gap-2">
-                                            <input type="text" name="message" class="form-control form-control-lg" placeholder="Tulis Pesan" required autocomplete="off">
+                                            <input type="text" name="message" class="form-control form-control-lg" placeholder="Tulis Pesan atau kirim file..." autocomplete="off">
                                             <button type="submit" name="send_message" value="1" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
                                         </div>
                                         <div>
@@ -262,9 +279,15 @@ include '../../includes/header.php';
                         html += '<div class="p-2 rounded-3 ' + (isOwn ? 'bg-primary text-white' : 'bg-light') + '" style="word-wrap: break-word;">' + escapeHtml(msg.message).replace(/
 /g, '<br>') + '</div>';
                         if (msg.attachments && msg.attachments.length > 0) {
-                            html += '<div class="mt-1">';
+                            html += '<div class="mt-1 d-flex flex-wrap gap-2">';
                             msg.attachments.forEach(function(att) {
-                                html += '<a href="' + baseUrl + escapeHtml(att.filepath) + '" target="_blank" class="badge bg-secondary text-decoration-none me-1"><i class="fas fa-paperclip"></i> ' + escapeHtml(att.filename).substring(0, 20) + '</a>';
+                                var ext = att.filepath.split('.').pop().toLowerCase();
+                                var imgExts = ['jpg','jpeg','png','gif','bmp','webp'];
+                                if (imgExts.indexOf(ext) !== -1) {
+                                    html += '<a href="' + baseUrl + escapeHtml(att.filepath) + '" target="_blank"><img src="' + baseUrl + escapeHtml(att.filepath) + '" alt="' + escapeHtml(att.filename) + '" class="rounded" style="max-width:200px;max-height:200px;object-fit:cover;cursor:pointer;"></a>';
+                                } else {
+                                    html += '<a href="' + baseUrl + escapeHtml(att.filepath) + '" target="_blank" class="badge bg-secondary text-decoration-none me-1"><i class="fas fa-paperclip"></i> ' + escapeHtml(att.filename).substring(0, 20) + '</a>';
+                                }
                             });
                             html += '</div>';
                         }

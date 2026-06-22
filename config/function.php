@@ -292,6 +292,14 @@ function createTicket($title, $description, $category_id, $division_id = null) {
         $user_data = getCurrentUserData();
         $division_id = $user_data['division_id'] ?? null;
     }
+    // Auto-assign IT Support division for STAFF role
+    if ($role === 'STAFF' && !$division_id) {
+        $division_id = '3cb297f6-6626-11f1-b204-001518018131';
+    }
+    // Auto-assign IT Support division for STAFF role
+    if ($role === 'STAFF' && !$division_id) {
+        $division_id = '3cb297f6-6626-11f1-b204-001518018131';
+    }
     $division = $division_id ? "'" . mysqli_real_escape_string($conn, $division_id) . "'" : 'NULL';
 
     $query = "INSERT INTO `Ticket` (id, code, title, description, status, difficulty_level, category_id, division_id, user_id, created_at, updated_at)
@@ -765,9 +773,10 @@ function sendMessage($ticket_id, $message) {
               VALUES (UUID(), '$message', '$ticket_id', '$sender_id', NOW())";
 
     if (mysqli_query($conn, $query)) {
-        $chat_id = mysqli_insert_id($conn);
-        if (!$chat_id) {
-            $r = mysqli_query($conn, "SELECT LAST_INSERT_ID() AS id");
+        // UUID primary key - mysqli_insert_id won't work, fetch the actual inserted ID
+        $r = mysqli_query($conn, "SELECT id FROM `Chat` WHERE message = '$message' AND ticket_id = '$ticket_id' AND sender_id = '$sender_id' ORDER BY created_at DESC LIMIT 1");
+        $chat_id = null;
+        if ($r && mysqli_num_rows($r) > 0) {
             $chat_id = mysqli_fetch_assoc($r)['id'];
         }
 

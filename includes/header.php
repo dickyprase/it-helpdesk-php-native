@@ -159,7 +159,7 @@ $unread_count = getUnreadNotificationCount(getCurrentUserId());
                         <div class="sb-sidenav-menu-heading">
                             <div class="d-flex align-items-center mb-2">
                                 <div style="flex:1; height:1px; background:#8c57ff33;"></div>
-                                <div class="mx-2">Menu Support</div>
+                                <div class="mx-2">Menu IT Support</div>
                                 <div style="flex:10; height:1px; background:#8c57ff33;"></div>
                             </div>
                         </div>
@@ -174,7 +174,8 @@ $unread_count = getUnreadNotificationCount(getCurrentUserId());
                         </a>
                         <div class="collapse" id="tiket_support" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/baru.php">Baru</a>
+                                <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/open.php">Tiket Baru</a>
+                                <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/baru.php">Semua Tiket</a>
                                 <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/proses.php">Dalam Antrian</a>
                                 <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/riwayat.php">Selesai</a>
                             </nav>
@@ -200,7 +201,7 @@ $unread_count = getUnreadNotificationCount(getCurrentUserId());
                         </a>
                         <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/baru.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-ticket"></i></div>
-                            Tiket Baru
+                            Tiket
                         </a>
 
                         <!-- Pengaturan (Manager only) -->
