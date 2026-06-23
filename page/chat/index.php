@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Allow send if there's text OR attachment (don't require both)
         if ($message || $has_attachment) {
-            $r = sendMessage($ticket_id, $message ?: '(file attachment)');
+            $r = sendMessage($ticket_id, $message ?: '📎');
             if ($r['status']) {
                 $chat_id = $r['chat_id'] ?? null;
                 if ($chat_id && $has_attachment) {
@@ -157,9 +157,7 @@ include '../../includes/header.php';
                                                             $is_img = in_array($att_ext, ['jpg','jpeg','png','gif','bmp','webp']);
                                                         ?>
                                                             <?php if ($is_img): ?>
-                                                                <a href="<?= getBaseUrl() . htmlspecialchars($att['filepath']) ?>" target="_blank">
-                                                                    <img src="<?= getBaseUrl() . htmlspecialchars($att['filepath']) ?>" alt="<?= htmlspecialchars($att['filename']) ?>" class="rounded" style="max-width: 200px; max-height: 200px; object-fit: cover; cursor: pointer;">
-                                                                </a>
+                                                                <img src="<?= getBaseUrl() . htmlspecialchars($att['filepath']) ?>" alt="<?= htmlspecialchars($att['filename']) ?>" class="rounded shadow-sm" style="max-width: 280px; max-height: 280px; object-fit: cover; cursor: pointer;" onclick="window.open(this.src, '_blank')">
                                                             <?php else: ?>
                                                                 <a href="<?= getBaseUrl() . htmlspecialchars($att['filepath']) ?>" target="_blank" class="badge bg-secondary text-decoration-none me-1" title="<?= htmlspecialchars($att['filename']) ?>">
                                                                     <i class="fas fa-paperclip"></i> <?= htmlspecialchars(potongTeks($att['filename'], 20)) ?>
@@ -284,7 +282,7 @@ include '../../includes/header.php';
                                 var ext = att.filepath.split('.').pop().toLowerCase();
                                 var imgExts = ['jpg','jpeg','png','gif','bmp','webp'];
                                 if (imgExts.indexOf(ext) !== -1) {
-                                    html += '<a href="' + baseUrl + escapeHtml(att.filepath) + '" target="_blank"><img src="' + baseUrl + escapeHtml(att.filepath) + '" alt="' + escapeHtml(att.filename) + '" class="rounded" style="max-width:200px;max-height:200px;object-fit:cover;cursor:pointer;"></a>';
+                                    html += '<img src="' + baseUrl + escapeHtml(att.filepath) + '" alt="' + escapeHtml(att.filename) + '" class="rounded shadow-sm" style="max-width:280px;max-height:280px;object-fit:cover;cursor:pointer;" onclick="window.open(this.src,\'_blank\')">';
                                 } else {
                                     html += '<a href="' + baseUrl + escapeHtml(att.filepath) + '" target="_blank" class="badge bg-secondary text-decoration-none me-1"><i class="fas fa-paperclip"></i> ' + escapeHtml(att.filename).substring(0, 20) + '</a>';
                                 }

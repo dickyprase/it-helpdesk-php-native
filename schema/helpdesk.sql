@@ -7,7 +7,7 @@
 -- 2. Buat database baru (misal: helpdesk)
 -- 3. Pilih database tersebut
 -- 4. Klik tab "Import"
--- 5. Pilih file ini → klik "Go"
+-- 5. Pilih file ini -> klik "Go"
 -- ============================================================
 
 SET NAMES utf8mb4;
@@ -231,7 +231,7 @@ INSERT IGNORE INTO `Category` (`id`, `name`, `description`) VALUES
 (UUID(), 'Other', 'Masalah lain yang tidak termasuk kategori di atas');
 
 -- ============================================================
--- DATA AWAL: Divisi (tanpa points, hanya label prioritas)
+-- DATA AWAL: Divisi
 -- ============================================================
 INSERT IGNORE INTO `Division` (`id`, `name`, `priority_level`) VALUES
 (UUID(), 'IT Infrastructure', 'TINGGI'),
