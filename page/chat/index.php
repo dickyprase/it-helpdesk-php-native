@@ -147,9 +147,12 @@ include '../../includes/header.php';
                                                     <div class="small text-muted mb-1 <?= $is_own ? 'text-end' : '' ?>">
                                                         <?= htmlspecialchars($msg['sender_name'] ?? '-') ?> | <?= htmlspecialchars($ticket['code'] ?? '') ?>
                                                     </div>
+                                                    <?php $msg_text = trim($msg['message'] ?? ''); $is_placeholder = in_array($msg_text, ['📎', '📎 File', '(file attachment)']); ?>
+                                                    <?php if (!$is_placeholder): ?>
                                                     <div class="p-2 rounded-3 <?= $is_own ? 'bg-primary text-white' : 'bg-light' ?>" style="word-wrap: break-word;">
                                                         <?= nl2br(htmlspecialchars($msg['message'] ?? '')) ?>
                                                     </div>
+                                                    <?php endif; ?>
                                                     <?php if (!empty($msg['attachments'])): ?>
                                                     <div class="mt-1 d-flex flex-wrap gap-2">
                                                         <?php foreach ($msg['attachments'] as $att):
@@ -274,8 +277,11 @@ include '../../includes/header.php';
                         html += '<div class="d-flex flex-row ' + (isOwn ? 'justify-content-end' : 'justify-content-start') + ' mb-3">';
                         html += '<div style="max-width: 75%;">';
                         html += '<div class="small text-muted mb-1 ' + (isOwn ? 'text-end' : '') + '">' + escapeHtml(msg.sender_name) + ' | ' + ticketCode + '</div>';
-                        html += '<div class="p-2 rounded-3 ' + (isOwn ? 'bg-primary text-white' : 'bg-light') + '" style="word-wrap: break-word;">' + escapeHtml(msg.message).replace(/
-/g, '<br>') + '</div>';
+                        var msgTrimmed = (msg.message || '').trim();
+                        var isPlaceholder = ['📎', '📎 File', '(file attachment)'].indexOf(msgTrimmed) !== -1;
+                        if (!isPlaceholder) {
+                            html += '<div class="p-2 rounded-3 ' + (isOwn ? 'bg-primary text-white' : 'bg-light') + '" style="word-wrap: break-word;">' + escapeHtml(msg.message).replace(/\n/g, '<br>') + '</div>';
+                        }
                         if (msg.attachments && msg.attachments.length > 0) {
                             html += '<div class="mt-1 d-flex flex-wrap gap-2">';
                             msg.attachments.forEach(function(att) {
