@@ -148,8 +148,8 @@ $unread_count = getUnreadNotificationCount(getCurrentUserId());
                         <div class="collapse" id="tiket_user" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
                                 <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/buat.php">Buat Tiket Baru</a>
-                                <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/antrian.php">Dalam Antrian</a>
-                                <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/selesai.php">Selesai</a>
+                                <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/antrian.php">Tiket Aktif</a>
+                                <a class="nav-link" href="<?= getBaseUrl() ?>page/tiket/selesai.php">Tiket Selesai</a>
                             </nav>
                         </div>
                         <?php endif; ?>

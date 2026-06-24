@@ -74,7 +74,7 @@ include '../../includes/header.php';
             <div class="card mb-4 shadow p-3 mb-5 bg-body rounded mt-4">
                 <div class="card-header">
                     <i class="fas fa-list me-1" style="color: #8c57ff;"></i>
-                    <span class="fw-semibold">Tiket dalam Proses</span>
+                    <span class="fw-semibold">Tiket Ditangani</span>
                     <span class="badge badge-subtle-primary ms-2"><?= count($tickets) ?></span>
                 </div>
                 <div class="card-body">

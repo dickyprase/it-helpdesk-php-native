@@ -131,8 +131,8 @@ include '../../includes/header.php';
                                     <td><?= statusBadge($ticket['status'] ?? '') ?></td>
                                     <?php if ($is_in_progress): ?>
                                     <td class="text-nowrap">
-                                        <button class="btn-action btn-action-danger me-1" data-bs-toggle="modal" data-bs-target="#difficultyModal" title="Tingkat Kesulitan"><i class="fas fa-gauge-high"></i></button>
-                                        <button class="btn-action btn-action-pause me-1" data-bs-toggle="modal" data-bs-target="#pendingModal" title="Pending Tiket"><i class="fas fa-pause"></i></button>
+                                        <button class="btn-action btn-action-danger me-1" data-bs-toggle="modal" data-bs-target="#difficultyModal" title="Tingkat Kesulitan"><i class="fas fa-gauge-high"></i> Kesulitan</button>
+                                        <button class="btn-action btn-action-pause me-1" data-bs-toggle="modal" data-bs-target="#pendingModal" title="Pending Tiket"><i class="fas fa-pause"></i> Pending</button>
                                         <button class="btn-action btn-action-check" data-bs-toggle="modal" data-bs-target="#resolveModal"><i class="fas fa-check"></i> Selesai</button>
                                     </td>
                                     <?php elseif ($is_pending): ?>

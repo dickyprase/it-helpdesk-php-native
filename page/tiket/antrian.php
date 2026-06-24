@@ -13,13 +13,13 @@ include '../../includes/header.php';
             <div class="card mb-4 shadow p-3 mb-5 bg-body rounded mt-4">
                 <div class="card-header">
                     <i class="fas fa-list me-1"></i>
-                    Tiket dalam Antrian (<?= count($tickets) ?>)
+                    Tiket Aktif (<?= count($tickets) ?>)
                 </div>
                 <div class="card-body">
                     <?php if (empty($tickets)): ?>
                     <div class="text-center text-muted py-4">
                         <i class="fas fa-inbox fa-3x mb-3"></i>
-                        <p>Belum ada tiket dalam antrian.</p>
+                        <p>Belum ada tiket aktif.</p>
                         <a href="<?= getBaseUrl() ?>page/tiket/buat.php" class="btn btn-success">Buat Tiket Baru</a>
                     </div>
                     <?php else: ?>

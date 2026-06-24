@@ -13,7 +13,7 @@ include '../../includes/header.php';
             <div class="card mb-4 shadow p-3 mb-5 bg-body rounded mt-4">
                 <div class="card-header">
                     <i class="fas fa-check-circle me-1"></i>
-                    Tiket Terselesaikan (<?= count($tickets) ?>)
+                    Tiket Selesai (<?= count($tickets) ?>)
                 </div>
                 <div class="card-body">
                     <?php if (empty($tickets)): ?>

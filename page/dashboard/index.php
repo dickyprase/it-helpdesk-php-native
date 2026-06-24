@@ -29,7 +29,7 @@ include '../../includes/header.php';
                     <div class="card shadow p-3 mb-4 bg-body rounded">
                         <div class="row d-flex align-items-center mb-3">
                             <div class="col-8">
-                                <div class="card-body">Tiket Baru</div>
+                                <div class="card-body">Tiket Belum Ditugaskan</div>
                             </div>
                             <div class="col-4 text-end">
                                 <div class="card-body" style="font-size: 30px; color: #8c57ff;"><?= $count_open ?></div>
@@ -42,7 +42,7 @@ include '../../includes/header.php';
                     <div class="card shadow p-3 mb-4 bg-body rounded">
                         <div class="row d-flex align-items-center mb-3">
                             <div class="col-8">
-                                <div class="card-body">Tiket Dalam Antrian</div>
+                                <div class="card-body">Tiket Ditangani</div>
                             </div>
                             <div class="col-4 text-end">
                                 <div class="card-body" style="font-size: 30px; color: #8c57ff;"><?= $count_queue ?></div>

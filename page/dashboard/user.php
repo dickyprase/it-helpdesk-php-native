@@ -34,7 +34,7 @@ include '../../includes/header.php';
                     <div class="card shadow p-3 bg-body rounded h-100">
                         <div class="row d-flex align-items-center mb-3">
                             <div class="col-8">
-                                <div class="card-body">Tiket Dalam Antrian</div>
+                                <div class="card-body">Tiket Aktif</div>
                             </div>
                             <div class="col-4 text-end">
                                 <div class="card-body" style="font-size: 30px; color: #8c57ff;"><?= $count_antrian ?></div>
