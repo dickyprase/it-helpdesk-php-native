@@ -193,7 +193,7 @@ $unread_count = getUnreadNotificationCount(getCurrentUserId());
                         </div>
                         <a class="nav-link" href="<?= getBaseUrl() ?>page/dashboard/manager.php">
                             <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
-                            Halaman Ranking
+                            Halaman Utama
                         </a>
                         <a class="nav-link" href="<?= getBaseUrl() ?>page/validasi/">
                             <div class="sb-nav-link-icon"><i class="fab fa-bitcoin"></i></div>

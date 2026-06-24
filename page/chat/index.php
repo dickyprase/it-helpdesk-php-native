@@ -45,6 +45,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($r['status']) { header('Location: ' . getBaseUrl() . 'page/chat/?id=' . urlencode($ticket_id)); exit; }
         else $msg_error = $r['message'];
     }
+    if (isset($_POST['set_pending'])) {
+        $reason = trim($_POST['pending_reason'] ?? '');
+        if ($reason) {
+            $r = setTicketPending($ticket_id, $reason);
+            if ($r['status']) { header('Location: ' . getBaseUrl() . 'page/chat/?id=' . urlencode($ticket_id)); exit; }
+            else $msg_error = $r['message'];
+        } else {
+            $msg_error = 'Alasan pending wajib diisi';
+        }
+    }
+    if (isset($_POST['resume_ticket'])) {
+        $r = updateTicketStatus($ticket_id, 'IN_PROGRESS');
+        if ($r['status']) { header('Location: ' . getBaseUrl() . 'page/chat/?id=' . urlencode($ticket_id)); exit; }
+        else $msg_error = $r['message'];
+    }
 }
 
 $ticket = getTicketById($ticket_id);
@@ -53,6 +68,7 @@ if (!$ticket) { header('Location: ' . getBaseUrl() . 'page/tiket/proses.php'); e
 $messages = getChatMessages($ticket_id);
 $current_user_id = getCurrentUserId();
 $is_in_progress = ($ticket['status'] ?? '') === 'IN_PROGRESS';
+$is_pending = ($ticket['status'] ?? '') === 'PENDING';
 $ticket_attachments = getTicketAttachments($ticket_id);
 
 include '../../includes/header.php';
@@ -115,8 +131,15 @@ include '../../includes/header.php';
                                     <td><?= statusBadge($ticket['status'] ?? '') ?></td>
                                     <?php if ($is_in_progress): ?>
                                     <td class="text-nowrap">
-                                        <button class="btn-action btn-action-danger me-1" data-bs-toggle="modal" data-bs-target="#difficultyModal"><i class="fas fa-gauge-high"></i></button>
+                                        <button class="btn-action btn-action-danger me-1" data-bs-toggle="modal" data-bs-target="#difficultyModal" title="Tingkat Kesulitan"><i class="fas fa-gauge-high"></i></button>
+                                        <button class="btn-action btn-action-pause me-1" data-bs-toggle="modal" data-bs-target="#pendingModal" title="Pending Tiket"><i class="fas fa-pause"></i></button>
                                         <button class="btn-action btn-action-check" data-bs-toggle="modal" data-bs-target="#resolveModal"><i class="fas fa-check"></i> Selesai</button>
+                                    </td>
+                                    <?php elseif ($is_pending): ?>
+                                    <td class="text-nowrap">
+                                        <form method="POST" class="d-inline">
+                                            <button type="submit" name="resume_ticket" value="1" class="btn-action btn-action-play" title="Lanjutkan Tiket"><i class="fas fa-play"></i> Lanjutkan</button>
+                                        </form>
                                     </td>
                                     <?php endif; ?>
                                 </tr>
@@ -243,6 +266,32 @@ include '../../includes/header.php';
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" name="set_difficulty" value="1" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($is_in_progress): ?>
+    <div class="modal fade" id="pendingModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pending Tiket</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-3">Tiket: <strong><?= htmlspecialchars($ticket['code'] ?? '') ?></strong></p>
+                        <div class="mb-3">
+                            <label class="form-label">Alasan Pending <span class="text-danger">*</span></label>
+                            <textarea name="pending_reason" class="form-control" rows="4" required placeholder="Jelaskan alasan menunda tiket ini..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" name="set_pending" value="1" class="btn btn-warning">Pending</button>
                     </div>
                 </form>
             </div>
